@@ -1,2 +1,2 @@
-# personnel-wyymusic
-私人网易云助理
+# personnel-music
+私人音乐助理
