@@ -80,6 +80,8 @@ async function downloadFile(url, filename) {
     });
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 
 async function downloadTheLatestMediaGet() {
     const latestVerisonUrl = 'https://ghproxy.com/https://raw.githubusercontent.com/foamzou/media-get/main/LATEST_VERSION';
@@ -94,6 +96,7 @@ async function downloadTheLatestMediaGet() {
     l('开始下载 media-get: ' + remoteFile);
     await downloadFile(remoteFile, getMediaGetBinPath());
     fs.chmodSync(getMediaGetBinPath(), '755');
+    await sleep(800);
     l('download finished');
 }
 
@@ -113,7 +116,7 @@ function copyDir(src, dest) {
 
 
 async function init() {
-    l('开始启动！');
+    l('开始初始化...');
     await runCmdAndExitWhenFailed('npm version', '请先安装 npm', false);
     await runCmdAndExitWhenFailed('ffmpeg -version', '请先安装 ffmpeg', false);
 
