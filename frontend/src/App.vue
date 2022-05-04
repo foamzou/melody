@@ -20,7 +20,7 @@
               </el-col>
               <el-col :span="7">
                 <a
-                  href="https://your-url"
+                  href="https://github.com/foamzou/melody"
                   class="github-corner"
                   aria-label="View source on GitHub"
                   ><svg
