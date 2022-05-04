@@ -1,0 +1,106 @@
+{
+  "songs": [
+    {
+      "name": "보랏빛향기",
+      "id": 38673614,
+      "pst": 0,
+      "t": 0,
+      "ar": [{ "id": 125509, "name": "姜修智", "tns": [], "alias": [] }],
+      "alia": [],
+      "pop": 60,
+      "st": 0,
+      "rt": null,
+      "fee": 1,
+      "v": 18,
+      "crbt": null,
+      "cf": "",
+      "al": {
+        "id": 3427658,
+        "name": "1집 보라빛 향기",
+        "picUrl": "https://p1.music.126.net/2j7ugeHwkBayxd5nmpgLlg==/3223768095974139.jpg",
+        "tns": ["淡紫色香气"],
+        "pic": 3223768095974139
+      },
+      "dt": 212819,
+      "h": { "br": 320000, "fid": 0, "size": 8514916, "vd": 2944 },
+      "m": { "br": 192000, "fid": 0, "size": 5108967, "vd": 3029 },
+      "l": { "br": 128000, "fid": 0, "size": 3405992, "vd": 4320 },
+      "a": null,
+      "cd": "1",
+      "no": 10,
+      "rtUrl": null,
+      "ftype": 0,
+      "rtUrls": [],
+      "djId": 0,
+      "copyright": 0,
+      "s_id": 0,
+      "mark": 270336,
+      "originCoverType": 1,
+      "originSongSimpleData": null,
+      "tagPicList": null,
+      "resourceState": true,
+      "version": 18,
+      "songJumpInfo": null,
+      "entertainmentTags": null,
+      "single": 0,
+      "noCopyrightRcmd": null,
+      "mst": 9,
+      "cp": 1416539,
+      "rtype": 0,
+      "rurl": null,
+      "mv": 0,
+      "publishTime": 1449825759282,
+      "tns": ["淡紫色香气"]
+    }
+  ],
+  "privileges": [
+    {
+      "id": 38673614,
+      "fee": 1,
+      "payed": 0,
+      "st": 0,
+      "pl": 0,
+      "dl": 0,
+      "sp": 0,
+      "cp": 0,
+      "subp": 0,
+      "cs": false,
+      "maxbr": 320000,
+      "fl": 0,
+      "toast": false,
+      "flag": 4,
+      "preSell": false,
+      "playMaxbr": 320000,
+      "downloadMaxbr": 320000,
+      "rscl": null,
+      "freeTrialPrivilege": { "resConsumable": false, "userConsumable": false },
+      "chargeInfoList": [
+        {
+          "rate": 128000,
+          "chargeUrl": null,
+          "chargeMessage": null,
+          "chargeType": 1
+        },
+        {
+          "rate": 192000,
+          "chargeUrl": null,
+          "chargeMessage": null,
+          "chargeType": 1
+        },
+        {
+          "rate": 320000,
+          "chargeUrl": null,
+          "chargeMessage": null,
+          "chargeType": 1
+        },
+        {
+          "rate": 999000,
+          "chargeUrl": null,
+          "chargeMessage": null,
+          "chargeType": 1
+        }
+      ]
+    }
+  ],
+  "code": 200
+}
