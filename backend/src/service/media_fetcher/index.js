@@ -20,7 +20,7 @@ async function fetchWithUrl(url, {
 }) {
     logger.info(`fetchWithUrl params: ${JSON.stringify(arguments)}`);
     if (songName) {
-        songName = songName.replace(/ /g, '').replace(/\./g, '').replace('/\//g', '');
+        songName = songName.replace(/ /g, '').replace(/\./g, '').replace(/\//g, '');
     }
     const requestHash = md5(`${url}${songName}${addMediaTag}`);
     const fileBasePath = `${basePath}/${requestHash}`;
