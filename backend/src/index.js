@@ -1,3 +1,8 @@
+// NeteaseCloudMusicApi 有不兼容的代码。晚点提 PR 改下，这里先 hack
+String.prototype.replaceAll = function (f, r) {
+  return this.replace(new RegExp(f, 'g'), r);
+};
+
 const path = require('path');
 const logger = require('consola');
 const cors = require('cors');
@@ -5,6 +10,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 5566;
+
 
 require('./init_app')().then(() => {
   const middlewareHandleError = require('./middleware/handle_error');

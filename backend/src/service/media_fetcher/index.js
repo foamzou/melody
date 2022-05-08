@@ -20,7 +20,7 @@ async function fetchWithUrl(url, {
 }) {
     logger.info(`fetchWithUrl params: ${JSON.stringify(arguments)}`);
     if (songName) {
-        songName = songName.replace(/ /g, '').replace(/\./g, '').replace(/\//g, '');
+        songName = songName.replace(/ /g, '').replace(/\./g, '').replace(/\//g, '').replace(/"/g, '');
     }
     const requestHash = md5(`${url}${songName}${addMediaTag}`);
     const fileBasePath = `${basePath}/${requestHash}`;
@@ -35,6 +35,8 @@ async function fetchWithUrl(url, {
     logger.info(`start parse and download from ${url}`);
 
     let cmdStr = `${getBinPath()} -u "${url}" --out "${downloadPath}" -t audio ${addMediaTag ? '--addMediaTag' : ''}`;
+
+    logger.info(cmdStr)
 
     const {code, message} = await cmd(cmdStr);
     logger.info('-------')
