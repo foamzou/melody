@@ -5,7 +5,7 @@ const fs = require('fs');
 const isWin = require('os').platform().indexOf('win32') > -1;
 const isLinux = require('os').platform().indexOf('linux') > -1;
 const isDarwin = require('os').platform().indexOf('darwin') > -1;
-const DIR = __dirname;
+const ROOT_DIR = `${__dirname}/../`;
 const l = m => console.log(m);
 
 const runCmd = (cmd, shouldOutput = true, cwd = null) => {
@@ -53,7 +53,7 @@ function asyncHttpsGet(url) {
 }
 
 function getMediaGetBinPath() {
-    return path.join(DIR, 'backend', 'bin', `media-get${isWin ? '.exe' : ''}`);
+    return path.join(ROOT_DIR, 'backend', 'bin', `media-get${isWin ? '.exe' : ''}`);
 }
 
 function getMediaGetRemoteFilename(latestVersion) {
@@ -82,8 +82,7 @@ async function downloadFile(url, filename) {
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-
-async function downloadTheLatestMediaGet() {
+async function getLatestMediaGetVersion() {
     const latestVerisonUrl = 'https://ghproxy.com/https://raw.githubusercontent.com/foamzou/media-get/main/LATEST_VERSION';
     // download the file
     const latestVersion = await asyncHttpsGet(latestVerisonUrl);
@@ -91,13 +90,35 @@ async function downloadTheLatestMediaGet() {
         l('获取 media-get 最新版本号失败, got: ' + latestVersion);
         return false;
     }
+    return latestVersion;
+}
 
+async function downloadTheLatestMediaGet(latestVersion = "") {
+    if (!latestVersion) {
+        latestVersion = await getLatestMediaGetVersion();
+        if (latestVersion === false) {
+            return false;
+        }
+    }
     const remoteFile = getMediaGetRemoteFilename(latestVersion);
     l('开始下载 media-get: ' + remoteFile);
     await downloadFile(remoteFile, getMediaGetBinPath());
     fs.chmodSync(getMediaGetBinPath(), '755');
     await sleep(800);
     l('download finished');
+}
+
+async function checkAndUpdateMediaGet(currentMediaGetVersion) {
+    const latestVersion = await getLatestMediaGetVersion();
+    if (latestVersion === false) {
+        return;
+    }
+    if (currentMediaGetVersion.localeCompare(latestVersion, undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
+        l('当前 media-get 版本已经是最新版本');
+        return;
+    }
+    l(`当前 media-get(${currentMediaGetVersion})版本不是最新版本, 开始更新到${latestVersion}`);
+    await downloadTheLatestMediaGet(latestVersion);
 }
 
 function copyDir(src, dest) {
@@ -134,16 +155,16 @@ function buildCmd(pm) {
 }
 
 function initAccountFileIfNotExisted() {
-    const targetFile = path.join(DIR, '/backend/.profile/accounts.json');
-    const sampleFile = path.join(DIR, '/backend/.profile/accounts.sample.json');
+    const targetFile = path.join(ROOT_DIR, '/backend/.profile/accounts.json');
+    const sampleFile = path.join(ROOT_DIR, '/backend/.profile/accounts.sample.json');
     if (!fs.existsSync(targetFile)) {
         fs.copyFileSync(sampleFile, targetFile);
         l('初始化 accounts.json 文件成功, 默认的 melody key 为： melody');
     }
 }
 
-async function init() {
-    l('开始初始化...');
+async function run() {
+    l('开始执行...');
     await runCmdAndExitWhenFailed('npm version', '请先安装 npm', false);
     await runCmdAndExitWhenFailed('ffmpeg -version', '请先安装 ffmpeg', false);
 
@@ -157,30 +178,33 @@ async function init() {
         }
         l('再次检查 media-get 是否安装成功');
         await runCmdAndExitWhenFailed(`${getMediaGetBinPath()} -h`, `media-get 安装失败。请手动从 https://github.com/foamzou/media-get/releases 下载最新版本到 ${getMediaGetBinPath()}`, false);
+    } else {
+        const currentMediaGetVersion = mediaGetRet.result.match(/Version: (.+?)\n/)[1];
+        await checkAndUpdateMediaGet(currentMediaGetVersion);
+        l('检查 media-get 是否更新成功');
+        await runCmdAndExitWhenFailed(`${getMediaGetBinPath()} -h`, `media-get 安装失败。请手动从 https://github.com/foamzou/media-get/releases 下载最新版本到 ${getMediaGetBinPath()}`, false);
     }
-
     const pm = await getPackageManager();
 
     l('安装 node_module')
-    await runCmdAndExitWhenFailed(`${pm} install --production`, '安装后端 node_module 失败', true, path.join(DIR, 'backend'))
-    await runCmdAndExitWhenFailed(`${pm} install`, '安装前端 node_module 失败', true, path.join(DIR, 'frontend'))
+    await runCmdAndExitWhenFailed(`${pm} install --production`, '安装后端 node_module 失败', true, path.join(ROOT_DIR, 'backend'))
+    await runCmdAndExitWhenFailed(`${pm} install`, '安装前端 node_module 失败', true, path.join(ROOT_DIR, 'frontend'))
 
     l('编译前端')
-    await runCmdAndExitWhenFailed(buildCmd(pm), '安装后端 node_module 失败', true, path.join(DIR, 'frontend'))
+    await runCmdAndExitWhenFailed(buildCmd(pm), '安装后端 node_module 失败', true, path.join(ROOT_DIR, 'frontend'))
 
     l('删除老目录')
     try {
-        fs.rmdirSync(path.join(DIR, 'backend', 'public'), { recursive: true });
+        fs.rmdirSync(path.join(ROOT_DIR, 'backend', 'public'), { recursive: true });
     } catch(e) {}
     
     l('拷贝前端目录')
-    copyDir(path.join(DIR, 'frontend', 'dist'), path.join(DIR, 'backend', 'public'));
+    copyDir(path.join(ROOT_DIR, 'frontend', 'dist'), path.join(ROOT_DIR, 'backend', 'public'));
 
     initAccountFileIfNotExisted();
     return true;
 }
 
-
-init().then( isFine => {
-    l(isFine ? `初始化完毕，执行以下命令启动服务：\r\n\r\nnode ${DIR}/backend/src/index.js` : '执行出错，请检查');
+run().then( isFine => {
+    l(isFine ? `执行完毕，执行以下命令启动服务：\r\n\r\nnpm run app` : '执行出错，请检查');
 });

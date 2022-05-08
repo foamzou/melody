@@ -1,0 +1,19 @@
+{
+  "name": "foamzou-melody",
+  "version": "0.1.1",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "init": "node scripts/setup.js",
+    "app": "node backend/src/index.js",
+    "update": "git pull && npm run init"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foamzou/melody.git"
+  },
+  "author": "foamzou",
+  "bugs": {
+    "url": "https://github.com/foamzou/melody/issues"
+  },
+  "homepage": "https://github.com/foamzou/melody#readme"
+}
