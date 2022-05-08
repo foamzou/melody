@@ -27,7 +27,7 @@
    - 从代码编译镜像(若你的 docker 不支持 DOCKER_BUILDKIT，则去掉)
      ```
      DOCKER_BUILDKIT=1 docker build -t melody .
-     docker run -p 5566:5566  -v ~/melody-profile:/app/backend/.profile melody
+     docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile melody
      ```
 
 ### 方式二：源码安装
