@@ -113,6 +113,25 @@ function copyDir(src, dest) {
     });
 }
 
+async function getPackageManager() {
+    let ret = await runCmd('pnpm --version', false);
+    if (ret.code === 0) {
+        return 'pnpm';
+    }
+    ret = await runCmd('yarn --version', false);
+    if (ret.code === 0) {
+        return 'yarn';
+    }
+
+    return 'npm';
+}
+
+function buildCmd(pm) {
+    if (pm == 'npm') {
+        return 'npm run build';
+    }
+    return `${pm} build`;
+}
 
 
 async function init() {
@@ -132,19 +151,14 @@ async function init() {
         await runCmdAndExitWhenFailed(`${getMediaGetBinPath()} -h`, `media-get 安装失败。请手动从 https://github.com/foamzou/media-get/releases 下载最新版本到 ${getMediaGetBinPath()}`, false);
     }
 
-    l('检查 pnpm')
-    const pnpmRet = await runCmd('pnpm version', false);
-    if (pnpmRet.code !== 0) {
-        l('未安装 pnpm，尝试安装');
-        await runCmdAndExitWhenFailed('npm install -g pnpm', '安装失败');
-    }
+    const pm = await getPackageManager();
 
     l('安装 node_module')
-    await runCmdAndExitWhenFailed('pnpm install', '安装后端 node_module 失败', true, path.join(DIR, 'backend'))
-    await runCmdAndExitWhenFailed('pnpm install', '安装前端 node_module 失败', true, path.join(DIR, 'frontend'))
+    await runCmdAndExitWhenFailed(`${pm} install --production`, '安装后端 node_module 失败', true, path.join(DIR, 'backend'))
+    await runCmdAndExitWhenFailed(`${pm} install`, '安装前端 node_module 失败', true, path.join(DIR, 'frontend'))
 
     l('编译前端')
-    await runCmdAndExitWhenFailed('pnpm build', '安装后端 node_module 失败', true, path.join(DIR, 'frontend'))
+    await runCmdAndExitWhenFailed(buildCmd(pm), '安装后端 node_module 失败', true, path.join(DIR, 'frontend'))
 
     l('删除老目录')
     try {
