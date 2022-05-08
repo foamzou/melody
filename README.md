@@ -36,7 +36,7 @@
 
    确保以下两个依赖是安装好的
 
-   1. node >= v14.19 ([官网下载](https://nodejs.org/zh-cn/download/))
+   1. node.js ([官网下载](https://nodejs.org/zh-cn/download/))
    2. FFmpeg ([windows 安装介绍](https://zhuanlan.zhihu.com/p/400952501))
 
 2. 下载源码、初始化服务、运行服务
