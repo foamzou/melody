@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/foamzou/personal-music-assistant#readme",
   "dependencies": {
-    "NeteaseCloudMusicApi": "4.5.8",
+    "NeteaseCloudMusicApi": "4.5.14",
     "body-parser": "^1.19.1",
     "consola": "^2.15.3",
     "cors": "^2.8.5",

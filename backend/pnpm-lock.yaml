@@ -1,7 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
-  NeteaseCloudMusicApi: 4.5.8
+  NeteaseCloudMusicApi: ^4.5.14
   body-parser: ^1.19.1
   consola: ^2.15.3
   cors: ^2.8.5
@@ -11,7 +11,7 @@ specifiers:
   uuid: ^8.3.2
 
 dependencies:
-  NeteaseCloudMusicApi: 4.5.8
+  NeteaseCloudMusicApi: 4.5.14
   body-parser: registry.npmmirror.com/body-parser/1.19.1
   consola: registry.nlark.com/consola/2.15.3
   cors: 2.8.5
@@ -45,8 +45,8 @@ packages:
     engines: {node: '>= 6'}
     dev: false
 
-  /NeteaseCloudMusicApi/4.5.8:
-    resolution: {integrity: sha512-kdXUS4migCgmegxilo7OfoJNQ/uJM/Lbz44OIJ1r6+/rRR3tPJB7RpbucYtfl5Gk/wBW9DDT+mia3HQGlSWxeQ==}
+  /NeteaseCloudMusicApi/4.5.14:
+    resolution: {integrity: sha512-Q33rUNXJY+0MX/asHq29SIPjpnXzFD3f0pBftyHlxa7ESELNKie3IYhDY+lsM+Dg9n0MAPmwcKDXmjry0nRFTg==}
     engines: {node: '>=12'}
     hasBin: true
     dependencies:

@@ -144,6 +144,8 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
         }),
         safeRequest(uid, playlist_track_all, {
             id: playlistId,
+            offset: 0,
+            limit: 1000,
         }),
     ]);
     if (detailResponse === false || songsResponse === false) {
@@ -153,6 +155,18 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
         logger.error(`uid(${uid}) playlist(${playlistId}) has no songs.`, detailResponse, songsResponse);
         return false;
     }
+    if (songsResponse.songs.length >= 1000) {
+        const songsPage2Response = await safeRequest(uid, playlist_track_all, {
+            id: playlistId,
+            offset: 1000,
+            limit: 1000,
+        });
+        if (songsPage2Response !== false && songsPage2Response.songs) {
+            songsResponse.songs = songsResponse.songs.concat(songsPage2Response.songs);
+            songsResponse.privileges = songsResponse.privileges.concat(songsPage2Response.privileges);
+        }
+    }
+
     let info = {
         id: playlistId,
         name: detailResponse.playlist.name,
