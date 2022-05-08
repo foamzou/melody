@@ -1,6 +1,5 @@
 # repo file
-/backend/.profile/accounts.json
-/backend/.profile/cookie
+/backend/.profile
 /backend/.data
 /backend/bin/media-get*
 /backend/public

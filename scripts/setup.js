@@ -147,26 +147,10 @@ async function getPackageManager() {
     return 'npm';
 }
 
-function buildCmd(pm) {
-    if (pm == 'npm') {
-        return 'npm run build';
-    }
-    return `${pm} build`;
-}
-
-function initAccountFileIfNotExisted() {
-    const targetFile = path.join(ROOT_DIR, '/backend/.profile/accounts.json');
-    const sampleFile = path.join(ROOT_DIR, '/backend/.profile/accounts.sample.json');
-    if (!fs.existsSync(targetFile)) {
-        fs.copyFileSync(sampleFile, targetFile);
-        l('初始化 accounts.json 文件成功, 默认的 melody key 为： melody');
-    }
-}
-
-async function run() {
+async function run(inDocker) {
     l('开始执行...');
     await runCmdAndExitWhenFailed('npm version', '请先安装 npm', false);
-    await runCmdAndExitWhenFailed('ffmpeg -version', '请先安装 ffmpeg', false);
+    !inDocker && await runCmdAndExitWhenFailed('ffmpeg -version', '请先安装 ffmpeg', false);
 
     l('检查 media-get');
     const mediaGetRet = await runCmd(`${getMediaGetBinPath()} -h`, false);
@@ -191,7 +175,7 @@ async function run() {
     await runCmdAndExitWhenFailed(`${pm} install`, '安装前端 node_module 失败', true, path.join(ROOT_DIR, 'frontend'))
 
     l('编译前端')
-    await runCmdAndExitWhenFailed(buildCmd(pm), '安装后端 node_module 失败', true, path.join(ROOT_DIR, 'frontend'))
+    await runCmdAndExitWhenFailed(`${pm} run build`, '安装后端 node_module 失败', true, path.join(ROOT_DIR, 'frontend'))
 
     l('删除老目录')
     try {
@@ -201,10 +185,11 @@ async function run() {
     l('拷贝前端目录')
     copyDir(path.join(ROOT_DIR, 'frontend', 'dist'), path.join(ROOT_DIR, 'backend', 'public'));
 
-    initAccountFileIfNotExisted();
     return true;
 }
 
-run().then( isFine => {
+const inDocker = process.env.MELODY_IN_DOCKER;
+
+run(inDocker).then( isFine => {
     l(isFine ? `执行完毕，执行以下命令启动服务：\r\n\r\nnpm run app` : '执行出错，请检查');
 });

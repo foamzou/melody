@@ -6,10 +6,10 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 5566;
 
-const middlewareHandleError = require('./middleware/handle_error');
-const middlewareAuth = require('./middleware/auth');
-
 require('./init_app')().then(() => {
+  const middlewareHandleError = require('./middleware/handle_error');
+  const middlewareAuth = require('./middleware/auth');
+
   app.use('/api', middlewareAuth);
 
   app.use(bodyParser.json());
