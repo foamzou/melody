@@ -1,14 +1,14 @@
 {
   "Melody Key，建议随机生成 UUID": {
     "loginType": "固定为：phone，目前仅支持手机号+密码登录。下面为示例",
-    "account": "填写手机号",
+    "account": "填写手机号。如：18888888888",
     "password": "填写密码",
     "platform": "固定为：wy，目前仅支持网易云。"
   },
-  "340a3857f2db4b9cb4812b9974714c18": {
+  "melody": {
     "loginType": "phone",
-    "account": "18888888888",
-    "password": "lalalaalala",
+    "account": "",
+    "password": "",
     "platform": "wy"
   }
 }

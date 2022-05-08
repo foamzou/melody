@@ -133,6 +133,14 @@ function buildCmd(pm) {
     return `${pm} build`;
 }
 
+function initAccountFileIfNotExisted() {
+    const targetFile = path.join(DIR, '/backend/.profile/accounts.json');
+    const sampleFile = path.join(DIR, '/backend/.profile/accounts.sample.json');
+    if (!fs.existsSync(targetFile)) {
+        fs.copyFileSync(sampleFile, targetFile);
+        l('初始化 accounts.json 文件成功, 默认的 melody key 为： melody');
+    }
+}
 
 async function init() {
     l('开始初始化...');
@@ -168,10 +176,11 @@ async function init() {
     l('拷贝前端目录')
     copyDir(path.join(DIR, 'frontend', 'dist'), path.join(DIR, 'backend', 'public'));
 
+    initAccountFileIfNotExisted();
     return true;
 }
 
 
 init().then( isFine => {
-    l(isFine ? `初始化完毕, 请编辑好 ${DIR}/backend/.profile/accounts.json 文件之后，执行以下命令启动服务：\r\n\r\nnode ${DIR}/backend/src/index.js` : '执行出错，请检查');
+    l(isFine ? `初始化完毕，执行以下命令启动服务：\r\n\r\nnode ${DIR}/backend/src/index.js` : '执行出错，请检查');
 });
