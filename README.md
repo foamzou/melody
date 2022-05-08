@@ -4,7 +4,7 @@
 
 <img src="./imgs/melody.png" width="100" ></img>
 
-大家好，我叫 Melody，是你的音乐精灵，旨在帮助你更好地管理音乐。目前的主要能力是帮助你将喜欢的歌曲或者音频上传到音乐平台的云盘。
+大家好，我叫 Melody，你的音乐精灵，旨在帮助你更好地管理音乐。目前的主要能力是帮助你将喜欢的歌曲或者音频上传到音乐平台的云盘。
 
 为了避免不必要的纠纷和账号安全问题，本项目不会以任何形式提供在线 demo 服务，也请大家不要使用公共服务。本地部署很简单。
 
@@ -16,42 +16,56 @@
 
 ## 安装和启动
 
-### 依赖
+### 方式一：Docker 安装
 
-确保以下两个依赖是安装好的
+1. 在你的宿主机创建一个目录，例如： `~/melody-profile`
+2. 创建镜像，有两种方式选择(注意修改下面的宿主机目录为你实际的)：
+   - 从 hub.docker.com 拉取
+     ```
+     docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile foamzou/melody:latest
+     ```
+   - 从代码编译镜像(若你的 docker 不支持 DOCKER_BUILDKIT，则去掉)
+     ```
+     DOCKER_BUILDKIT=1 docker build -t melody .
+     docker run -p 5566:5566  -v ~/melody-profile:/app/backend/.profile melody
+     ```
 
-1. node >= v14.19 ([官网下载](https://nodejs.org/zh-cn/download/))
-2. FFmpeg ([windows 安装介绍](https://zhuanlan.zhihu.com/p/400952501))
+### 方式二：源码安装
 
-### 下载源码及初始化服务
+1. 依赖
 
-其中 init.js 会下载核心组件，初始化 node 依赖，尽可能不需要你关心安装细节
+   确保以下两个依赖是安装好的
 
-```
-git clone https://github.com/foamzou/melody.git
-cd melody
-node init.js
-```
+   1. node >= v14.19 ([官网下载](https://nodejs.org/zh-cn/download/))
+   2. FFmpeg ([windows 安装介绍](https://zhuanlan.zhihu.com/p/400952501))
 
-### 配置你的账号
+2. 下载源码、初始化服务、运行服务
 
-```
-cp backend/.profile/accounts.sample.json backend/.profile/accounts.json
-```
+   ```
+   git clone https://github.com/foamzou/melody.git
+   cd melody && npm run init && npm run app
+   ```
 
-然后编辑 `backend/.profile/accounts.json` 。
+3. 若后面代码有更新，下次执行该命令即可更新
+   ```
+   npm run update && npm run app
+   ```
+
+### 配置你的账号（可选）
+
+默认的 melody key 为： `melody`，若你的服务部署在私有网络，则可以不用修改（网易云账号、密码可以在 web 页面设置）。
+
+若需要修改或添加新账号，则编辑 `backend/.profile/accounts.json` （安装方式为 docker 的则为：`你的宿主机目录/accounts.json` ） 。
 
 1. 该 JSON 中的 key 是 `Melody Key`，是你在网页访问该服务的唯一凭证
 2. 网易云账号信息： `account` 和 `password` 可以后续在网页修改
 3. 该 JSON 是个数组，支持配置多个账号
 
-### 启动服务
+Q: 更新了 accounts.json 如何生效？
 
-> 建议使用 pm2 将本服务常驻后台
+A: 两种方式。1: 重启服务。2: 网页端 `我的音乐账号` tab 下，随便修改点账号，密码，然后点击 `更新账号密码`，这样会从 accounts.json 更新信息到内存（我后面优化下这块）
 
-```
-node backend/src/index.js
-```
+### 浏览器访问
 
 最后，在浏览器访问 http://127.0.0.1:5566 就可以使用啦~
 
@@ -86,7 +100,7 @@ node backend/src/index.js
 - [ ] 云盘歌曲 match 手动纠错
 - [ ] 支持播放列表
 - [ ] 支持播放云盘的歌曲
-- [ ] 支持 docker 部署
+- [-] 支持 docker 部署
 - [ ] 支持 youtube-dl,you-dl 等工具作为输入源
 - [ ] 支持 酷狗、qq 音乐等音乐平台的云盘作为输出
 - [ ] 偏好设置
@@ -94,6 +108,7 @@ node backend/src/index.js
 
 ## Change log
 
+- 2022/05/08: 支持 docker 部署，修复了一些小 bug
 - 2022/05/04: 发布 MVP 版本
 
 ## 致谢
