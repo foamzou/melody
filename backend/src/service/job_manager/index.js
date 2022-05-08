@@ -4,7 +4,7 @@ const genUUID = require('../../utils/uuid');
 const { lock, unlock } = require('../../utils/simple_locker');
 const JobStatus = require('../../consts/job_status');
 
-const DataPath = `${__dirname}/../../../.data`;
+const DataPath = `${__dirname}/../../../.profile/data`;
 const JobDataPath = `${DataPath}/jobs`;
 
 async function listJobs(uid) {

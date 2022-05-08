@@ -7,8 +7,8 @@ function initDir() {
     // make sure all dir has been created
     const dirList = [
         __dirname + '/../.profile/cookie',
-        __dirname + '/../.data',
-        __dirname + '/../.data/jobs',
+        __dirname + '/../.profile/data',
+        __dirname + '/../.profile/data/jobs',
     ];
 
     dirList.forEach(dir => {
