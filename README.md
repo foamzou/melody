@@ -51,6 +51,9 @@
    npm run update && npm run app
    ```
 
+### 方式三：使用 Koyeb 的免费服务部署
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=docker&image=foamzou/melody:latest&ports=5566;http;/&name=melody)
+
 ### 配置你的账号（可选）
 
 默认的 melody key 为： `melody`，若你的服务部署在私有网络，则可以不用修改（网易云账号、密码可以在 web 页面设置）。
