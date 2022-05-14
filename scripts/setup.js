@@ -64,6 +64,9 @@ function getMediaGetRemoteFilename(latestVersion) {
     if (isDarwin) {
         suffix = 'darwin';
     }
+    if (process.arch === 'arm64') {
+        suffix += '-arm64';
+    }
     return `https://ghproxy.com/https://github.com/foamzou/media-get/releases/download/v${latestVersion}/media-get-${latestVersion}-${suffix}`;
 }
 
