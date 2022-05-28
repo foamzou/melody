@@ -60,7 +60,20 @@
                   :span="10"
                   style="margin: 0 0 20px 40px; font-size: 13px; color: grey"
                 >
-                  目前仅支持手机+密码登录
+                  <el-radio-group v-model="account.loginType" class="ml-4">
+                    <el-radio label="phone" size="large">手机号登录</el-radio>
+                    <el-radio label="email" size="large">邮箱登录</el-radio>
+                  </el-radio-group>
+                </el-col>
+              </el-row>
+              <el-row v-if="account.loginType == 'phone'">
+                <el-col :span="4"> 国际电话区号 </el-col>
+                <el-col :span="8">
+                  <el-input
+                    v-model="account.countryCode"
+                    placeholder="默认86，不需要输入 +"
+                    maxlength="4"
+                  ></el-input>
                 </el-col>
               </el-row>
               <el-row>
@@ -148,10 +161,45 @@ export default {
     },
 
     async updateAccount() {
-      if (!this.account.account || !this.account.password) {
+      if (
+        !this.account.account ||
+        !this.account.password ||
+        !this.account.loginType
+      ) {
         return;
       }
+
+      if (this.account.loginType == "phone") {
+        if (this.account.countryCode) {
+          if (!/^[\d]{0,4}$/.test(this.account.countryCode)) {
+            ElMessage({
+              center: true,
+              type: "error",
+              message: "国际电话区号不正确",
+            });
+            return;
+          }
+        }
+      }
+
+      if (this.account.loginType == "email") {
+        if (
+          !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
+            this.account.account
+          )
+        ) {
+          ElMessage({
+            center: true,
+            type: "error",
+            message: "邮箱格式不正确",
+          });
+          return;
+        }
+      }
+
       const ret = await setAccount({
+        loginType: this.account.loginType,
+        countryCode: this.account.countryCode,
         account: this.account.account,
         password: this.account.password,
       });

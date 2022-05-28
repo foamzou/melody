@@ -20,7 +20,7 @@ function getAccount(uid) {
     return account;
 }
 
-async function setAccount(uid, account, password) {
+async function setAccount(uid, loginType, account, password, countryCode = '') {
     const lockKey = 'setAccount';
     await locker.lock(lockKey, 5);
 
@@ -31,12 +31,14 @@ async function setAccount(uid, account, password) {
         locker.unlock(lockKey);
         return false;
     }
-    if (userAccount.account == account && userAccount.password == password) {
+    if (userAccount.loginType == loginType && userAccount.account == account && userAccount.password == password && userAccount.countryCode == countryCode) {
         locker.unlock(lockKey);
         return true;
     }
+    userAccount.loginType = loginType;
     userAccount.account = account;
     userAccount.password = password;
+    userAccount.countryCode = countryCode;
     AccountMap[uid] = userAccount;
 
     storeAccount(AccountMap);

@@ -1,4 +1,3 @@
-const logger = require('consola');
 const AccountService = require('../service/account');
 const WYAPI = require('../service/music_platform/wycloud');
 
@@ -12,8 +11,10 @@ async function get(req, res) {
 }
 
 async function set(req, res) {
+    const loginType = req.body.loginType;
     const accountName = req.body.account;
     const password = req.body.password;
+    const countryCode = req.body.countryCode;
     if (!accountName || !password) {
         res.status(422).send({
             status: 1,
@@ -23,7 +24,7 @@ async function set(req, res) {
         return;
     }
 
-    const ret = await AccountService.setAccount(req.account.uid, accountName, password);
+    const ret = await AccountService.setAccount(req.account.uid, loginType, accountName, password, countryCode);
     res.send({
         status: ret ? 0 : 1,
         data: {

@@ -52,6 +52,7 @@
    ```
 
 ### 方式三：使用 Koyeb 的免费服务部署
+
 [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=docker&image=foamzou/melody:latest&ports=5566;http;/&name=melody)
 
 ### 配置你的账号（可选）
@@ -103,7 +104,7 @@ A: 两种方式。1: 重启服务。2: 网页端 `我的音乐账号` tab 下，
 - [ ] 云盘歌曲 match 手动纠错
 - [ ] 支持播放列表
 - [ ] 支持播放云盘的歌曲
-- [-] 支持 docker 部署
+- [x] 支持 docker 部署
 - [ ] 支持 youtube-dl,you-dl 等工具作为输入源
 - [ ] 支持 酷狗、qq 音乐等音乐平台的云盘作为输出
 - [ ] 偏好设置
@@ -111,6 +112,7 @@ A: 两种方式。1: 重启服务。2: 网页端 `我的音乐账号` tab 下，
 
 ## Change log
 
+- 2022/05/27: 支持国际电话区号、邮箱登录网易云
 - 2022/05/08: 支持 docker 部署，修复了一些小 bug
 - 2022/05/04: 发布 MVP 版本
 

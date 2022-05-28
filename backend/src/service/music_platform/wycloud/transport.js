@@ -1,11 +1,12 @@
 const logger = require('consola');
 const AccountService = require('../../account');
-const { login_cellphone, login_refresh } = require('NeteaseCloudMusicApi');
+const { login_cellphone, login_refresh, login } = require('NeteaseCloudMusicApi');
 const CookiePath = `${__dirname}/../../../../.profile/cookie/`;
 const fs = require('fs');
 
 
 const LoginTypePhone = 'phone';
+const LoginTypeEmail = 'email';
 
 const CookieMap = {};
 
@@ -79,23 +80,31 @@ async function getCookie(uid, refresh = false) {
     }
 
     // login
-    logger.info(`uid(${uid}) login...`)
+    logger.info(`uid(${uid}) login with ${account.countryCode} ${account.account} via ${account.loginType}`);
+
+    let result;
     if (account.loginType === LoginTypePhone) {
-        const result = await requestWyyApi(login_cellphone, {
+        result = await requestWyyApi(login_cellphone, {
+            countrycode: account.countrycode,
             phone: account.account,
             password: account.password,
+        });   
+    } else if (account.loginType === LoginTypeEmail) {
+        result = await requestWyyApi(login, {
+            email: account.account,
+            password: account.password,
         });
-        
-        if (result && result.status == 200 && result.body && result.body.code == 200 && result.body.cookie) {
-            logger.info(`uid(${uid}) login succeed`)
-            storeCookie(uid, account, result.body.cookie);
-            return result.body.cookie;
-        }
-        logger.error(`fetch cookie from response failed, uid(${uid}) login failed`, result);
+    } else {
+        logger.error(`uid(${uid})'s loginType(${account.loginType}) does not support now`);
         return false;
     }
 
-    logger.error(`uid(${uid})'s loginType(${account.loginType}) does not support now`);
+    if (result && result.status == 200 && result.body && result.body.code == 200 && result.body.cookie) {
+        logger.info(`uid(${uid}) login succeed`)
+        storeCookie(uid, account, result.body.cookie);
+        return result.body.cookie;
+    }
+    logger.error(`fetch cookie from response failed, uid(${uid}) login failed`, result);
     return false;
 }
 
