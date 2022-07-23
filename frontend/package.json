@@ -10,8 +10,11 @@
   "dependencies": {
     "axios": "0.26.1",
     "element-plus": "2.1.9",
+    "howler": "^2.2.3",
+    "vant": "^3.4.9",
     "vue": "3.2.33",
     "vue-router": "4.0.12",
+    "vue-virtual-scroller": "2.0.0-alpha.1",
     "vuex": "4.0.2"
   },
   "devDependencies": {

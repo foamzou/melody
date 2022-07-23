@@ -1,6 +1,6 @@
-export function secondDurationToDisplayDuration(secondDuration) {
+export function secondDurationToDisplayDuration(secondDuration, allowZero = false) {
     if (!secondDuration) {
-        return " - ";
+        return allowZero ? "00:00" : " - ";
     }
     secondDuration = parseInt(secondDuration);
     let duration = secondDuration;
@@ -28,3 +28,19 @@ export function sourceCodeToName(source) {
         "youtube": "YouTube",
     }[source] || "未知";
 }
+
+export function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function ellipsis(value, maxLength) {
+    if (!value) {
+        return "";
+    }
+    value = value.trim();
+    if (!value) return "";
+    if (value.length > maxLength) {
+      return value.slice(0, maxLength) + "...";
+    }
+    return value;
+  }

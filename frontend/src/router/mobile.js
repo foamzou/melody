@@ -4,17 +4,17 @@ import storage from "../utils/storage"
 const routes = [
     {
         path: '/',
-        component: () => import('../views/pc/Home.vue')             
+        component: () => import('../views/mobile/Home.vue')             
     },
     {
         path: '/account',
         name: "Account",
-        component: () => import('../views/pc/Account.vue')   
+        component: () => import('../views/mobile/Account.vue')   
     },
     {
         path: '/playlist',
         name: "Playlist",
-        component: () => import('../views/pc/Playlist.vue')   
+        component: () => import('../views/mobile/Playlist.vue')   
     },
 ]
 export const router = createRouter({

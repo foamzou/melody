@@ -107,8 +107,8 @@
 </template>
 
 <script>
-import { getAccount, setAccount } from "../api";
-import storage from "../utils/storage";
+import { getAccount, setAccount } from "../../api";
+import storage from "../../utils/storage";
 import { ElMessage } from "element-plus";
 
 export default {

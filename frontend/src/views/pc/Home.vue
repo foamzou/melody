@@ -182,11 +182,11 @@
 </template>
 
 <script>
-import { searchSongs, getSongsMeta, createSyncSongFromUrlJob } from "../api";
-import SearchResultTable from "../components/SearchResultTable.vue";
-import { secondDurationToDisplayDuration, sourceCodeToName } from "../utils";
-import { startTaskListener } from "../components/TaskNotification";
-import storage from "../utils/storage";
+import { searchSongs, getSongsMeta, createSyncSongFromUrlJob } from "../../api";
+import SearchResultTable from "../../components/SearchResultTable.vue";
+import { secondDurationToDisplayDuration, sourceCodeToName } from "../../utils";
+import { startTaskListener } from "../../components/TaskNotification";
+import storage from "../../utils/storage";
 
 export default {
   data: () => {

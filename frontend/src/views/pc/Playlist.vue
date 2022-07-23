@@ -2,7 +2,7 @@
   <el-container style="margin-top: 20px">
     <el-aside width="300px" style="margin-left: 80px">
       <el-scrollbar height="600px">
-        <div v-for="item in playlists" :key="item" class="scrollbar-demo-item">
+        <div v-for="item in playlists" :key="item" class="scrollbar-item">
           <el-link :underline="false" @click="showPlaylistDetail(item.id)">
             <el-row>
               <el-col :span="5">
@@ -177,7 +177,7 @@
 </template>
 
 <style scoped>
-.scrollbar-demo-item {
+.scrollbar-item {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -197,10 +197,10 @@ import {
   getPlaylistDetail,
   createSyncSongFromPlaylistJob,
   createSyncSongWithSongIdJob,
-} from "../api";
-import { secondDurationToDisplayDuration, sourceCodeToName } from "../utils";
-import SearchResultTable from "../components/SearchResultTable.vue";
-import { startTaskListener } from "../components/TaskNotification";
+} from "../../api";
+import { secondDurationToDisplayDuration, sourceCodeToName } from "../../utils";
+import SearchResultTable from "../../components/SearchResultTable.vue";
+import { startTaskListener } from "../../components/TaskNotification";
 import { ref } from "vue";
 
 export default {
