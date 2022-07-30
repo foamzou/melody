@@ -49,10 +49,10 @@ export default defineConfig(({command, mode}) => {
           },
           {
             name: "vant",
-            var: "Vant",
+            var: "vant",
             path: 'https://cdn.bootcdn.net/ajax/libs/vant/3.4.8/vant.js',
             css: ["https://cdn.bootcdn.net/ajax/libs/vant/3.4.8/index.css"],
-        },
+        }
         ]
       }),
     ],

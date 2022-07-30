@@ -4,7 +4,7 @@ specifiers:
   '@vitejs/plugin-vue': ^2.3.1
   axios: 0.26.1
   element-plus: 2.1.9
-  howler: ^2.2.3
+  howler: github:foamzou/howler.js#0.0.1-foam
   rollup: ^2.70.2
   vant: ^3.4.9
   vite: ^2.9.2
@@ -17,7 +17,7 @@ specifiers:
 dependencies:
   axios: 0.26.1
   element-plus: 2.1.9_vue@3.2.33
-  howler: 2.2.3
+  howler: github.com/foamzou/howler.js/b8764072a5e9e48adec50ed57691f04c49c0500d
   vant: 3.4.9_vue@3.2.33
   vue: 3.2.33
   vue-router: 4.0.12_vue@3.2.33
@@ -525,10 +525,6 @@ packages:
       function-bind: 1.1.1
     dev: true
 
-  /howler/2.2.3:
-    resolution: {integrity: sha512-QM0FFkw0LRX1PR8pNzJVAY25JhIWvbKMBFM4gqk+QdV+kPXOhleWGCB6AiAF/goGjIHK2e/nIElplvjQwhr0jg==}
-    dev: false
-
   /is-core-module/2.8.1:
     resolution: {integrity: sha512-SdNCUs284hr40hFTFP6l0IfZ/RSrMXF3qgoRHd3/79unUTvrFO/JoXwkGm+5J/Oe3E/b5GsnG330uUNgRpu1PA==}
     dependencies:
@@ -762,4 +758,10 @@ packages:
     dependencies:
       '@vue/devtools-api': 6.1.4
       vue: 3.2.33
+    dev: false
+
+  github.com/foamzou/howler.js/b8764072a5e9e48adec50ed57691f04c49c0500d:
+    resolution: {tarball: https://codeload.github.com/foamzou/howler.js/tar.gz/b8764072a5e9e48adec50ed57691f04c49c0500d}
+    name: howler
+    version: 2.2.3
     dev: false

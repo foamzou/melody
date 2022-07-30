@@ -13,7 +13,7 @@ axiosApiInstance.defaults.timeout = 5000;
 axiosApiInstance.interceptors.request.use(
     config => {
         config.headers = {
-            'mk': storage.get('mk')
+            'mk': (config.params && config.params['mk']) ? config.params['mk'] : storage.get('mk')
         }
         return config;
     },

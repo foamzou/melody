@@ -33,11 +33,16 @@ export function startTaskListener(jobID) {
                 duration = 4500;
             }
 
-            Notify({
+            const options = {
                 message: `${res.data.jobs.tip}\n${res.data.jobs.name}\n${res.data.jobs.desc}`,
                 type,
                 duration,
-            });
+            };
+            if (options.type == 'primary') {
+                options.color= "#ad0000";
+                options.background= "#ffe1e1";
+            }
+            Notify(options);
         })
     };
 

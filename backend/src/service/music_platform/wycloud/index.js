@@ -1,6 +1,6 @@
 const logger = require('consola');
 const {
-    cloud, cloudsearch, cloud_match, song_detail,
+    cloud, cloudsearch, cloud_match, song_detail, song_url,
     user_playlist, playlist_detail, user_account, playlist_track_all
 } = require('NeteaseCloudMusicApi');
 const fs = require('fs');
@@ -70,6 +70,10 @@ async function matchAndFixCloudSong(uid, cloudSongId, wySongId) {
     if (response === false) {
         return false;
     }
+    if (response.code > 399) {
+        logger.warn(response);
+        return false;
+    }
     return true;
 }
 
@@ -109,6 +113,19 @@ async function getSongInfo(uid, id) {
         album: songInfo.al.name,
         cover: songInfo.al.picUrl,
     };
+}
+
+async function getPlayUrl(uid, id) {
+    const response = await safeRequest(uid, song_url, {
+        id,
+    });
+    if (response === false) {
+        return '';
+    }
+    if (!response.data || !response.data[0].url) {
+        return '';
+    }
+    return response.data[0].url;
 }
 
 async function getUserAllPlaylist(uid) {
@@ -247,4 +264,5 @@ module.exports = {
     getSongsFromPlaylist: getSongsFromPlaylist,
     getUserAllPlaylist: getUserAllPlaylist,
     getSongInfo: getSongInfo,
+    getPlayUrl: getPlayUrl,
 }

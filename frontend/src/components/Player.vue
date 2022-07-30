@@ -35,6 +35,8 @@
       <van-col span="3">
         <van-popover
           v-model:show="showPopover"
+          overlay
+          overlay-class="popover-overlay"
           :actions="actions"
           placement="left-end"
           @select="onSelect"
@@ -83,7 +85,7 @@
 
 <script>
 import { nextTick, ref } from "vue";
-import { Howl, Howler } from "howler";
+import * as Howler from "howler";
 import { secondDurationToDisplayDuration, sleep } from "../utils";
 import { createSyncSongFromUrlJob } from "../api";
 import { startTaskListener } from "./TaskNotificationForMobile";
@@ -150,9 +152,10 @@ export default {
       if (playerCtl) {
         playerCtl.stop();
       }
-      playerCtl = new Howl({
+      playerCtl = new Howler.Howl({
         src: [this.currentSong.playUrl],
         html5: true,
+        preload: "metadata",
         onload: () => {
           console.log("load");
           this.totalTime = playerCtl.duration();
@@ -160,6 +163,12 @@ export default {
         onend: () => {
           console.log("end");
           this.isPlaying = false;
+        },
+        onloaderror: (id, err) => {
+          console.log("load error", id, err);
+        },
+        onplayerror: (id, err) => {
+          console.log("play error", id, err);
         },
       });
       currentPlayId = playerCtl.play();

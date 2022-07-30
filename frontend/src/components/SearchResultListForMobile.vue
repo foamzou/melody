@@ -11,6 +11,11 @@
             <van-col span="22">
               <van-row @click="play(null, item.url, i)">
                 <van-col style="font-size: 16px">
+                  <i
+                    v-if="item.resourceForbidden"
+                    class="bi bi-lock-fill"
+                    style="font-size: 13px; padding-right: 5px; color: gray"
+                  ></i>
                   <span>
                     {{ ellipsis(item.songName, 18) }}
                   </span>
@@ -58,7 +63,9 @@
                       songIndex: i,
                     },
                   ]"
-                  placement="left-end"
+                  placement="left"
+                  overlay
+                  overlay-class="popover-overlay"
                   @select="onSelect"
                 >
                   <template #reference>
@@ -97,10 +104,6 @@ export default {
       type: Function,
       required: true,
     },
-    abortTheSong: {
-      type: Function,
-      required: true,
-    },
     suggestMatchSongId: {
       type: String,
       required: false,
@@ -122,15 +125,11 @@ export default {
     const playTheSong = (songMeta, pageUrl, suggestMatchSongId) => {
       props.playTheSong(songMeta, pageUrl, suggestMatchSongId);
     };
-    const abortTheSong = () => {
-      props.abortTheSong();
-    };
 
     const showPopover = ref([]);
 
     return {
       playTheSong,
-      abortTheSong,
       showPopover,
       ellipsis,
     };
@@ -164,10 +163,6 @@ export default {
       }
       this.currentSongIndex = index;
       this.playTheSong(songMeta, pageUrl, this.suggestMatchSongId);
-    },
-    abort() {
-      this.currentSongIndex = -1;
-      this.abortTheSong();
     },
     async onSelect(actionItem) {
       const currentSong = this.searchResult[actionItem.songIndex];

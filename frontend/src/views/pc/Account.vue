@@ -140,11 +140,11 @@ export default {
       if (!this.mk) {
         return;
       }
-      storage.set("mk", this.mk);
-      const ret = await getAccount();
+      const ret = await getAccount({ mk: this.mk });
       if (ret !== false && ret.data) {
         this.account = ret.data.account;
         this.registedMK = true;
+        storage.set("mk", this.mk);
         storage.set("wyAccount", ret.data.account.wyAccount);
         ElMessage({
           center: true,

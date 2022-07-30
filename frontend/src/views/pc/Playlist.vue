@@ -68,7 +68,7 @@
             <el-col :span="7">
               <el-switch
                 style="float: left"
-                v-model="showUnblockSongsOnly"
+                v-model="showBlockSongsOnly"
                 active-text="仅展示无法播放的歌曲"
                 @change="filterHandlerChange($event)"
               />
@@ -110,7 +110,7 @@
                 <i
                   v-if="scope.row.isBlocked"
                   class="bi bi-lock-fill"
-                  style="font-size: 20px"
+                  style="font-size: 20px; color: gray"
                 ></i>
                 <i
                   v-else-if="scope.row.isCloud"
@@ -148,13 +148,14 @@
                     </el-link>
                   </el-tooltip>
                 </div>
-                <div v-else-if="scope.row.playUrl">
+                <div v-else-if="!scope.row.isBlocked">
                   <el-tooltip content="播放歌曲" placement="top">
                     <el-link
                       type="primary"
                       :underline="false"
                       @click="
                         playTheSongWithPlayUrl({
+                          songId: scope.row.songId,
                           playUrl: scope.row.playUrl,
                           coverUrl: scope.row.cover,
                           songName: scope.row.songName,
@@ -175,6 +176,13 @@
     </el-main>
   </el-container>
 </template>
+
+<style>
+.el-overlay,
+.el-overlay-dialog {
+  height: calc(100% - 60px);
+}
+</style>
 
 <style scoped>
 .scrollbar-item {
@@ -209,12 +217,13 @@ export default {
       searchTip: "",
       showSearchPage: false,
       tableKey: 1,
-      showUnblockSongsOnly: true,
+      showBlockSongsOnly: true,
       tableFilterValues: ["blocked"],
       playlists: [],
       playlistDetail: {},
       searchResult: [],
       suggestMatchSongId: "",
+      lastSearch: "",
     };
   },
   components: {
@@ -309,9 +318,13 @@ export default {
       this.tableKey++;
     },
     async searchTheSong(pageUrl) {
+      this.showSearchPage = true;
+
+      if (this.lastSearch === pageUrl) {
+        return;
+      }
       this.searchTip = "正在搜索...";
       this.searchResult = [];
-      this.showSearchPage = true;
       console.log(pageUrl);
 
       if (pageUrl.indexOf("163.com") >= 0 && pageUrl.indexOf("/song") >= 0) {
@@ -336,6 +349,7 @@ export default {
 
       this.searchResult = songs;
       this.searchTip = "";
+      this.lastSearch = pageUrl;
     },
   },
 };

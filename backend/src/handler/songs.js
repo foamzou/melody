@@ -1,5 +1,6 @@
 const logger = require('consola');
 const { searchSongsWithKeyword, searchSongsWithSongMeta } = require('../service/search_songs');
+const { getPlayUrlWithOptions } = require('../service/songs_info');
 const { getMetaWithUrl } = require('../service/media_fetcher');
 const { matchUrlFromStr } = require('../utils/regex');
 
@@ -48,6 +49,28 @@ async function search(req, res) {
     });
 }
 
+async function getPlayUrl(req, res) {
+    const source = req.params.source;
+    const songId = req.params.id;
+
+    if (!source || !songId) {
+        res.send({
+            status: 1,
+            message: "source and songId is required",
+        });
+        return;
+    }
+    const playUrl = await getPlayUrlWithOptions(req.account.uid, source, songId);
+
+    res.send({
+        status: 0,
+        data: {
+            playUrl,
+        }
+    });
+}
+
 module.exports = {
-    search: search
+    search: search,
+    getPlayUrl: getPlayUrl
 }

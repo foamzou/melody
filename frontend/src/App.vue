@@ -101,7 +101,7 @@
                 style="padding: 6px; width: 50px; height: 50px"
               />
             </el-col>
-            <el-col :span="2" style="margin-top: 12px; margin-left: 2px">
+            <el-col :span="3" style="margin-top: 12px; margin-left: 2px">
               <el-row style="font-weight: bold">
                 {{ playerSongInfo.songName }}
               </el-row>
@@ -109,7 +109,7 @@
                 {{ playerSongInfo.artist }}
               </el-row>
             </el-col>
-            <el-col :span="12" :offset="1">
+            <el-col :span="12">
               <audio
                 id="audio"
                 autoplay
@@ -160,7 +160,7 @@
 </template>
 
 <script>
-import { searchSongs, getSongsMeta, createSyncSongFromUrlJob } from "./api";
+import { getPlayUrl, getSongsMeta, createSyncSongFromUrlJob } from "./api";
 import { startTaskListener } from "./components/TaskNotification";
 import storage from "./utils/storage";
 
@@ -224,11 +224,20 @@ export default {
       this.playerSongInfo.pageUrl = info.pageUrl || pageUrl;
     },
     async playTheSongWithPlayUrl(playOption) {
+      if (!playOption.playUrl) {
+        const playUrlRet = await getPlayUrl(playOption.songId);
+        if (!playUrlRet.data.playUrl) {
+          return false;
+        }
+        playOption.playUrl = playUrlRet.data.playUrl;
+      }
+
       this.playerSongInfo.playUrl = playOption.playUrl;
       this.playerSongInfo.coverUrl = playOption.coverUrl;
       this.playerSongInfo.songName = playOption.songName;
       this.playerSongInfo.artist = playOption.artist;
       this.playerSongInfo.pageUrl = playOption.pageUrl;
+      return true;
     },
     abortTheSong() {
       this.playerSongInfo.playUrl = "";

@@ -50,10 +50,9 @@
     <router-view
       :playTheSong="playTheSong"
       :playTheSongWithPlayUrl="playTheSongWithPlayUrl"
-      :abortTheSong="abortTheSong"
       v-slot="{ Component }"
       :style="
-        songInfos.length > 0 ? 'margin-bottom: 136px;' : 'margin-bottom: 0px;'
+        songInfos.length > 0 ? 'margin-bottom: 136px;' : 'margin-bottom: 60px;'
       "
     >
       <transition>
@@ -83,10 +82,14 @@
       ></Player>
     </div>
 
-    <van-tabbar v-model="active" @change="onChange">
-      <van-tabbar-item icon="search" @click="search()">搜索</van-tabbar-item>
-      <van-tabbar-item icon="like-o" @click="playlist()">歌单</van-tabbar-item>
-      <van-tabbar-item icon="setting-o" @click="account()"
+    <van-tabbar v-model="active" route>
+      <van-tabbar-item icon="search" to="/" @click="search()"
+        >搜索</van-tabbar-item
+      >
+      <van-tabbar-item icon="like-o" to="/playlist" @click="playlist()"
+        >歌单</van-tabbar-item
+      >
+      <van-tabbar-item icon="contact" to="/account" @click="account()"
         >音乐账号</van-tabbar-item
       >
     </van-tabbar>
@@ -95,20 +98,22 @@
 
 <script>
 import { ref } from "vue";
-import { searchSongs, getSongsMeta, createSyncSongFromUrlJob } from "./api";
+import {
+  searchSongs,
+  getSongsMeta,
+  createSyncSongFromUrlJob,
+  getPlayUrl,
+} from "./api";
 import { startTaskListener } from "./components/TaskNotification";
 import Player from "./components/Player.vue";
 import storage from "./utils/storage";
+import { Notify } from "vant";
 
 export default {
   setup() {
     const active = ref(0);
-    const onChange = (index) => {
-      console.log(`标签 ${index}`);
-    };
     return {
       active,
-      onChange,
     };
   },
   components: {
@@ -131,14 +136,6 @@ export default {
     },
   },
   methods: {
-    async uploadToCloud(pageUrl) {
-      const ret = await createSyncSongFromUrlJob(pageUrl); // TODO: add songID
-      console.log(ret);
-
-      if (ret.data && ret.data.jobId) {
-        startTaskListener(ret.data.jobId);
-      }
-    },
     search() {
       this.$router.push("/");
     },
@@ -175,12 +172,18 @@ export default {
       this.changedTime = new Date().getTime();
     },
     async playTheSongWithPlayUrl(playOption) {
+      if (!playOption.playUrl) {
+        const playUrlRet = await getPlayUrl(playOption.songId);
+        if (!playUrlRet.data.playUrl) {
+          Notify({ type: "warning", message: "获取播放链接失败" });
+          return false;
+        }
+        playOption.playUrl = playUrlRet.data.playUrl;
+      }
       this.songInfos.push(playOption);
       this.currentSongIndex = this.songInfos.length - 1;
       this.changedTime = new Date().getTime();
-    },
-    abortTheSong() {
-      this.playerSongInfo.playUrl = "";
+      return true;
     },
   },
 };
