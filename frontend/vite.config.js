@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import importToCDN from 'vite-plugin-cdn-import'
 import path from 'path'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig(({command, mode}) => {
   return {
@@ -13,6 +14,28 @@ export default defineConfig(({command, mode}) => {
       'process.env': process.env
     },
     plugins: [
+      VitePWA({
+        registerType: 'autoUpdate',
+        manifest: {
+          name: 'Melody',
+          short_name: 'Melody',
+          description: 'Enjoy your music with Melody',
+          theme_color: '#ffffff',
+          start_url:"./mobile.html",
+          icons: [
+            {
+              src: 'melody-192x192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'melody-512x512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            }
+          ]
+        }
+      }),
       vue(),
       importToCDN({
         modules:[

@@ -220,6 +220,7 @@ export default {
           break;
         case ActionDownload:
           const a = document.createElement("a");
+          a.target = "_blank";
           a.href = this.currentSong.playUrl;
           a.download = `${this.currentSong.songName}-${this.currentSong.artist}.mp3`;
           a.style.display = "none";

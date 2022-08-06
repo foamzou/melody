@@ -38,10 +38,6 @@ export function startTaskListener(jobID) {
                 type,
                 duration,
             };
-            if (options.type == 'primary') {
-                options.color= "#ad0000";
-                options.background= "#ffe1e1";
-            }
             Notify(options);
         })
     };

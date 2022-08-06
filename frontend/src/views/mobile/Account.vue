@@ -46,6 +46,13 @@
             >
           </van-col>
         </van-row>
+
+        <!-- <van-row style="margin-top: 10px">
+          <van-col :span="8" :offset="16" style="text-align: left">
+            <van-button @click="triggerInstallPWA">安装到桌面</van-button>
+          </van-col>
+        </van-row> -->
+
         <van-row>
           <van-col :offset="3" style="margin-top: 50px">
             <h3>网易云账号信息</h3>
@@ -110,6 +117,7 @@
 <script>
 import { getAccount, setAccount } from "../../api";
 import storage from "../../utils/storage";
+// import { installPWA } from "../../utils/pwa";
 import { Notify } from "vant";
 
 export default {
@@ -137,6 +145,9 @@ export default {
     console.log(this.account);
   },
   methods: {
+    // async triggerInstallPWA() {
+    //   await installPWA();
+    // },
     async checkMK() {
       this.MKChecking = true;
       this.mk = this.mk.trim();

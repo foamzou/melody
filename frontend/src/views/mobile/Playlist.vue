@@ -27,7 +27,7 @@
     <van-tabs
       v-model:active="active"
       sticky
-      @rendered="onTabChange"
+      @rendered="onRendered"
       @change="onTabChange"
     >
       <van-tab v-for="(item, i) in playlists" :key="i">
@@ -383,6 +383,12 @@ export default {
       this.lastSearch = pageUrl;
     },
     onTabChange(tabIndex) {
+      this.showPlaylistDetail(tabIndex);
+    },
+    onRendered(tabIndex) {
+      if (tabIndex !== 0) {
+        return;
+      }
       this.showPlaylistDetail(tabIndex);
     },
     closeThePopup() {
