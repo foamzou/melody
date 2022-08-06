@@ -128,7 +128,12 @@
                 placement="top"
               >
                 <el-link
-                  @click="uploadToCloud(playerSongInfo.pageUrl)"
+                  @click="
+                    uploadToCloud(
+                      playerSongInfo.pageUrl,
+                      playerSongInfo.suggestMatchSongId
+                    )
+                  "
                   :disabled="
                     !playerSongInfo.pageUrl || !wyAccount ? true : false
                   "
@@ -173,6 +178,7 @@ export default {
         coverUrl: "/melody.png",
         playUrl: "",
         pageUrl: "",
+        suggestMatchSongId: "",
       },
       wyAccount: null,
     };
@@ -186,8 +192,8 @@ export default {
     },
   },
   methods: {
-    async uploadToCloud(pageUrl) {
-      const ret = await createSyncSongFromUrlJob(pageUrl); // TODO: add songID
+    async uploadToCloud(pageUrl, suggestMatchSongId) {
+      const ret = await createSyncSongFromUrlJob(pageUrl, suggestMatchSongId);
       console.log(ret);
 
       if (ret.data && ret.data.jobId) {
@@ -203,7 +209,7 @@ export default {
     playlist() {
       this.$router.push("/playlist");
     },
-    async playTheSong(metaInfo, pageUrl) {
+    async playTheSong(metaInfo, pageUrl, suggestMatchSongId) {
       console.log("------------------------");
       console.log(metaInfo);
       console.log(pageUrl);
@@ -222,6 +228,7 @@ export default {
       this.playerSongInfo.songName = info.songName;
       this.playerSongInfo.artist = info.artist;
       this.playerSongInfo.pageUrl = info.pageUrl || pageUrl;
+      this.playerSongInfo.suggestMatchSongId = suggestMatchSongId;
     },
     async playTheSongWithPlayUrl(playOption) {
       if (!playOption.playUrl) {

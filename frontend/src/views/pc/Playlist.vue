@@ -250,8 +250,8 @@ export default {
       props.playTheSongWithPlayUrl(playOption);
     };
 
-    const playTheSong = (metaInfo, playUrl) => {
-      props.playTheSong(metaInfo, playUrl);
+    const playTheSong = (metaInfo, playUrl, suggestMatchSongId) => {
+      props.playTheSong(metaInfo, playUrl, suggestMatchSongId);
     };
     const abortTheSong = () => {
       props.abortTheSong();

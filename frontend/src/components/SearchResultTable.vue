@@ -32,7 +32,7 @@
         <el-tooltip content="播放歌曲" placement="top">
           <el-link
             v-if="scope.row.url != currentSongUrl"
-            @click="play(null, scope.row.url, scope.$index)"
+            @click="play(null, scope.row.url)"
             :underline="false"
             :disabled="
               scope.row.url.indexOf('bilibili') >= 0 ||
@@ -109,8 +109,8 @@ export default {
     this.wyAccount = storage.get("wyAccount");
   },
   setup(props, { emit }) {
-    const playTheSong = (songMeta, pageUrl, index) => {
-      props.playTheSong(songMeta, pageUrl, index);
+    const playTheSong = (songMeta, pageUrl, suggestMatchSongId) => {
+      props.playTheSong(songMeta, pageUrl, suggestMatchSongId);
     };
     const abortTheSong = () => {
       props.abortTheSong();
@@ -137,9 +137,9 @@ export default {
         startTaskListener(ret.data.jobId);
       }
     },
-    play(songMeta, pageUrl, index) {
+    play(songMeta, pageUrl) {
       this.currentSongUrl = pageUrl;
-      this.playTheSong(songMeta, pageUrl, index);
+      this.playTheSong(songMeta, pageUrl, this.suggestMatchSongId);
     },
     abort() {
       this.currentSongUrl = -1;
