@@ -101,7 +101,7 @@
                 style="padding: 6px; width: 50px; height: 50px"
               />
             </el-col>
-            <el-col :span="2" style="margin-top: 12px; margin-left: 2px">
+            <el-col :span="3" style="margin-top: 12px; margin-left: 2px">
               <el-row style="font-weight: bold">
                 {{ playerSongInfo.songName }}
               </el-row>
@@ -109,7 +109,7 @@
                 {{ playerSongInfo.artist }}
               </el-row>
             </el-col>
-            <el-col :span="12" :offset="1">
+            <el-col :span="12">
               <audio
                 id="audio"
                 autoplay
@@ -128,7 +128,12 @@
                 placement="top"
               >
                 <el-link
-                  @click="uploadToCloud(playerSongInfo.pageUrl)"
+                  @click="
+                    uploadToCloud(
+                      playerSongInfo.pageUrl,
+                      playerSongInfo.suggestMatchSongId
+                    )
+                  "
                   :disabled="
                     !playerSongInfo.pageUrl || !wyAccount ? true : false
                   "
@@ -160,7 +165,7 @@
 </template>
 
 <script>
-import { searchSongs, getSongsMeta, createSyncSongFromUrlJob } from "./api";
+import { getPlayUrl, getSongsMeta, createSyncSongFromUrlJob } from "./api";
 import { startTaskListener } from "./components/TaskNotification";
 import storage from "./utils/storage";
 
@@ -173,6 +178,7 @@ export default {
         coverUrl: "/melody.png",
         playUrl: "",
         pageUrl: "",
+        suggestMatchSongId: "",
       },
       wyAccount: null,
     };
@@ -186,8 +192,8 @@ export default {
     },
   },
   methods: {
-    async uploadToCloud(pageUrl) {
-      const ret = await createSyncSongFromUrlJob(pageUrl); // TODO: add songID
+    async uploadToCloud(pageUrl, suggestMatchSongId) {
+      const ret = await createSyncSongFromUrlJob(pageUrl, suggestMatchSongId);
       console.log(ret);
 
       if (ret.data && ret.data.jobId) {
@@ -203,7 +209,7 @@ export default {
     playlist() {
       this.$router.push("/playlist");
     },
-    async playTheSong(metaInfo, pageUrl) {
+    async playTheSong(metaInfo, pageUrl, suggestMatchSongId) {
       console.log("------------------------");
       console.log(metaInfo);
       console.log(pageUrl);
@@ -222,13 +228,23 @@ export default {
       this.playerSongInfo.songName = info.songName;
       this.playerSongInfo.artist = info.artist;
       this.playerSongInfo.pageUrl = info.pageUrl || pageUrl;
+      this.playerSongInfo.suggestMatchSongId = suggestMatchSongId;
     },
     async playTheSongWithPlayUrl(playOption) {
+      if (!playOption.playUrl) {
+        const playUrlRet = await getPlayUrl(playOption.songId);
+        if (!playUrlRet.data.playUrl) {
+          return false;
+        }
+        playOption.playUrl = playUrlRet.data.playUrl;
+      }
+
       this.playerSongInfo.playUrl = playOption.playUrl;
       this.playerSongInfo.coverUrl = playOption.coverUrl;
       this.playerSongInfo.songName = playOption.songName;
       this.playerSongInfo.artist = playOption.artist;
       this.playerSongInfo.pageUrl = playOption.pageUrl;
+      return true;
     },
     abortTheSong() {
       this.playerSongInfo.playUrl = "";

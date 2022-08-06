@@ -8,7 +8,7 @@
           content="可能无法播放 / 试听版本"
           placement="top"
         >
-          <i class="bi bi-lock-fill" style="font-size: 18px"></i>
+          <i class="bi bi-lock-fill" style="font-size: 18px; color: gray"></i>
         </el-tooltip>
         {{ scope.row.songName }}
       </template>
@@ -21,7 +21,7 @@
       <template #default="scope">
         <el-tooltip content="停止播放" placement="top">
           <el-link
-            v-if="scope.$index == currentSongIndex"
+            v-if="scope.row.url == currentSongUrl"
             @click="abort()"
             :underline="false"
             type="primary"
@@ -31,8 +31,8 @@
         </el-tooltip>
         <el-tooltip content="播放歌曲" placement="top">
           <el-link
-            v-if="scope.$index != currentSongIndex"
-            @click="play(null, scope.row.url, scope.$index)"
+            v-if="scope.row.url != currentSongUrl"
+            @click="play(null, scope.row.url)"
             :underline="false"
             :disabled="
               scope.row.url.indexOf('bilibili') >= 0 ||
@@ -83,7 +83,7 @@ import storage from "../utils/storage";
 export default {
   data() {
     return {
-      currentSongIndex: -1,
+      currentSongUrl: -1,
       wyAccount: null,
     };
   },
@@ -109,8 +109,8 @@ export default {
     this.wyAccount = storage.get("wyAccount");
   },
   setup(props, { emit }) {
-    const playTheSong = (songMeta, pageUrl, index) => {
-      props.playTheSong(songMeta, pageUrl, index);
+    const playTheSong = (songMeta, pageUrl, suggestMatchSongId) => {
+      props.playTheSong(songMeta, pageUrl, suggestMatchSongId);
     };
     const abortTheSong = () => {
       props.abortTheSong();
@@ -137,12 +137,12 @@ export default {
         startTaskListener(ret.data.jobId);
       }
     },
-    play(songMeta, pageUrl, index) {
-      this.currentSongIndex = index;
-      this.playTheSong(songMeta, pageUrl, index);
+    play(songMeta, pageUrl) {
+      this.currentSongUrl = pageUrl;
+      this.playTheSong(songMeta, pageUrl, this.suggestMatchSongId);
     },
     abort() {
-      this.currentSongIndex = -1;
+      this.currentSongUrl = -1;
       this.abortTheSong();
     },
   },

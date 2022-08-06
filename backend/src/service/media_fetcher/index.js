@@ -34,11 +34,11 @@ async function fetchWithUrl(url, {
     const downloadPath = `${fileBasePath}/${songName ? songName : requestHash}.mp3`;
     logger.info(`start parse and download from ${url}`);
 
-    let cmdStr = `${getBinPath()} -u "${url}" --out "${downloadPath}" -t audio ${addMediaTag ? '--addMediaTag' : ''}`;
+    let args = ['-u', `"${url}"`, '--out', `"${downloadPath}"`, '-t', 'audio', `${addMediaTag ? '--addMediaTag' : ''}`];
 
-    logger.info(cmdStr)
+    logger.info(`${getBinPath()} ${args.join(' ')}`);
 
-    const {code, message} = await cmd(cmdStr);
+    const {code, message} = await cmd(getBinPath(), args);
     logger.info('-------')
     logger.info(code);
     logger.info(message);
@@ -56,12 +56,12 @@ async function fetchWithUrl(url, {
 async function getMetaWithUrl(url) {
     logger.info(`getMetaWithUrl from ${url}`);
 
-    let cmdStr = `${getBinPath()} -u "${url}" -m --infoFormat=json`;
+    let args = ['-u', `"${url}"`, '-m', '--infoFormat=json'];
 
-    const {code, message} = await cmd(cmdStr);
+    const {code, message} = await cmd(getBinPath(), args);
     logger.info('-------')
     logger.info(code);
-    logger.info(message);
+    // logger.info(message);
     logger.info('-------')
     if (code != 0) {
         logger.error(`getMetaWithUrl failed with ${url}, err: ${message}`);
@@ -92,10 +92,14 @@ async function searchSongFromAllPlatform({
 }) {
     logger.info(`searchSong with ${JSON.stringify(arguments)}`);
 
-    const searchParams = keyword ? `-k "${keyword}"` : `--searchSongName "${songName}" --searchArtist "${artist}" --searchAlbum "${album}"`;
-    let cmdStr = `${getBinPath()} ${searchParams} --searchType="song" -m --infoFormat=json -l silence`;
-    logger.info(`cmdStr: ${cmdStr}`);
-    const {code, message} = await cmd(cmdStr);
+    let searchParams = keyword 
+        ? ['-k', `"${keyword}"`] 
+        : ['--searchSongName', `"${songName}"`, '--searchArtist', `"${artist}"`, '--searchAlbum', `"${album}"`];
+    searchParams = searchParams.concat(['--searchType="song"', '-m', '--infoFormat=json', '-l', 'silence']);
+
+    logger.info(`cmdStr: ${getBinPath()} ${searchParams.join(' ')}`);
+
+    const {code, message} = await cmd(getBinPath(), searchParams);
     logger.info('-------')
     logger.info(code);
     // logger.info(message);

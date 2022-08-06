@@ -15,6 +15,7 @@ router.get('/api/sync-jobs', asyncWrapper(SyncJob.listAllJobs));
 router.get('/api/sync-jobs/:id', asyncWrapper(SyncJob.getJob));
 
 router.get('/api/songs', asyncWrapper(Songs.search));
+router.get('/api/songs/:source/:id/playUrl', asyncWrapper(Songs.getPlayUrl));
 
 router.get('/api/songs-meta', asyncWrapper(SongMeta.getMeta));
 

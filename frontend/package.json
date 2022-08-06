@@ -10,14 +10,19 @@
   "dependencies": {
     "axios": "0.26.1",
     "element-plus": "2.1.9",
+    "howler": "github:foamzou/howler.js#0.0.1-foam",
+    "vant": "^3.4.9",
     "vue": "3.2.33",
     "vue-router": "4.0.12",
+    "vue-virtual-scroller": "2.0.0-alpha.1",
     "vuex": "4.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.1",
     "rollup": "^2.70.2",
-    "vite": "^2.9.2",
-    "vite-plugin-cdn-import": "^0.3.5"
+    "vite": "^2.9.14",
+    "vite-plugin-cdn-import": "^0.3.5",
+    "vite-plugin-pwa": "^0.12.3",
+    "workbox-window": "^6.5.4"
   }
 }

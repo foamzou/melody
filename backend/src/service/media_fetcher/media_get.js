@@ -7,9 +7,7 @@ function getBinPath() {
 }
 
 async function getMediaGetInfo() {
-    let cmdStr = `${getBinPath()} -h`;
-
-    const {code, message} = await cmd(cmdStr);
+    const {code, message} = await cmd(getBinPath(), ['-h']);
     if (code != 0) {
         logger.error(`please install media-get first`);
         return false;

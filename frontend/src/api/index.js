@@ -2,6 +2,7 @@ import { get, post} from "./axios";
 
 export const searchSongs = data => get("/songs", data);
 export const getSongsMeta = data => get("/songs-meta", data);
+export const getPlayUrl = songId => get(`/songs/netease/${songId}/playUrl`);
 
 export const getAccount = data => get("/account", data);
 export const setAccount = data => post("/account", data);

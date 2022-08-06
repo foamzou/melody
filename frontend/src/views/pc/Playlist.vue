@@ -2,7 +2,7 @@
   <el-container style="margin-top: 20px">
     <el-aside width="300px" style="margin-left: 80px">
       <el-scrollbar height="600px">
-        <div v-for="item in playlists" :key="item" class="scrollbar-demo-item">
+        <div v-for="item in playlists" :key="item" class="scrollbar-item">
           <el-link :underline="false" @click="showPlaylistDetail(item.id)">
             <el-row>
               <el-col :span="5">
@@ -68,7 +68,7 @@
             <el-col :span="7">
               <el-switch
                 style="float: left"
-                v-model="showUnblockSongsOnly"
+                v-model="showBlockSongsOnly"
                 active-text="仅展示无法播放的歌曲"
                 @change="filterHandlerChange($event)"
               />
@@ -110,7 +110,7 @@
                 <i
                   v-if="scope.row.isBlocked"
                   class="bi bi-lock-fill"
-                  style="font-size: 20px"
+                  style="font-size: 20px; color: gray"
                 ></i>
                 <i
                   v-else-if="scope.row.isCloud"
@@ -148,13 +148,14 @@
                     </el-link>
                   </el-tooltip>
                 </div>
-                <div v-else-if="scope.row.playUrl">
+                <div v-else-if="!scope.row.isBlocked">
                   <el-tooltip content="播放歌曲" placement="top">
                     <el-link
                       type="primary"
                       :underline="false"
                       @click="
                         playTheSongWithPlayUrl({
+                          songId: scope.row.songId,
                           playUrl: scope.row.playUrl,
                           coverUrl: scope.row.cover,
                           songName: scope.row.songName,
@@ -176,8 +177,15 @@
   </el-container>
 </template>
 
+<style>
+.el-overlay,
+.el-overlay-dialog {
+  height: calc(100% - 60px);
+}
+</style>
+
 <style scoped>
-.scrollbar-demo-item {
+.scrollbar-item {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -197,10 +205,10 @@ import {
   getPlaylistDetail,
   createSyncSongFromPlaylistJob,
   createSyncSongWithSongIdJob,
-} from "../api";
-import { secondDurationToDisplayDuration, sourceCodeToName } from "../utils";
-import SearchResultTable from "../components/SearchResultTable.vue";
-import { startTaskListener } from "../components/TaskNotification";
+} from "../../api";
+import { secondDurationToDisplayDuration, sourceCodeToName } from "../../utils";
+import SearchResultTable from "../../components/SearchResultTable.vue";
+import { startTaskListener } from "../../components/TaskNotification";
 import { ref } from "vue";
 
 export default {
@@ -209,12 +217,13 @@ export default {
       searchTip: "",
       showSearchPage: false,
       tableKey: 1,
-      showUnblockSongsOnly: true,
+      showBlockSongsOnly: true,
       tableFilterValues: ["blocked"],
       playlists: [],
       playlistDetail: {},
       searchResult: [],
       suggestMatchSongId: "",
+      lastSearch: "",
     };
   },
   components: {
@@ -241,8 +250,8 @@ export default {
       props.playTheSongWithPlayUrl(playOption);
     };
 
-    const playTheSong = (metaInfo, playUrl) => {
-      props.playTheSong(metaInfo, playUrl);
+    const playTheSong = (metaInfo, playUrl, suggestMatchSongId) => {
+      props.playTheSong(metaInfo, playUrl, suggestMatchSongId);
     };
     const abortTheSong = () => {
       props.abortTheSong();
@@ -309,9 +318,13 @@ export default {
       this.tableKey++;
     },
     async searchTheSong(pageUrl) {
+      this.showSearchPage = true;
+
+      if (this.lastSearch === pageUrl) {
+        return;
+      }
       this.searchTip = "正在搜索...";
       this.searchResult = [];
-      this.showSearchPage = true;
       console.log(pageUrl);
 
       if (pageUrl.indexOf("163.com") >= 0 && pageUrl.indexOf("/song") >= 0) {
@@ -336,6 +349,7 @@ export default {
 
       this.searchResult = songs;
       this.searchTip = "";
+      this.lastSearch = pageUrl;
     },
   },
 };

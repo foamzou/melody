@@ -182,11 +182,11 @@
 </template>
 
 <script>
-import { searchSongs, getSongsMeta, createSyncSongFromUrlJob } from "../api";
-import SearchResultTable from "../components/SearchResultTable.vue";
-import { secondDurationToDisplayDuration, sourceCodeToName } from "../utils";
-import { startTaskListener } from "../components/TaskNotification";
-import storage from "../utils/storage";
+import { searchSongs, getSongsMeta, createSyncSongFromUrlJob } from "../../api";
+import SearchResultTable from "../../components/SearchResultTable.vue";
+import { secondDurationToDisplayDuration, sourceCodeToName } from "../../utils";
+import { startTaskListener } from "../../components/TaskNotification";
+import storage from "../../utils/storage";
 
 export default {
   data: () => {
@@ -220,8 +220,8 @@ export default {
     },
   },
   setup(props, { emit }) {
-    const playTheSong = (songMeta, pageUrl) => {
-      props.playTheSong(songMeta, pageUrl);
+    const playTheSong = (songMeta, pageUrl, suggestMatchSongId) => {
+      props.playTheSong(songMeta, pageUrl, suggestMatchSongId);
     };
     const abortTheSong = () => {
       props.abortTheSong();
@@ -236,7 +236,7 @@ export default {
   },
   methods: {
     async uploadToCloud(pageUrl) {
-      const ret = await createSyncSongFromUrlJob(pageUrl); // TODO: add songID
+      const ret = await createSyncSongFromUrlJob(pageUrl);
       console.log(ret);
 
       if (ret.data && ret.data.jobId) {
