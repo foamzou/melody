@@ -11,6 +11,7 @@
 ## Feature
 
 - 支持在各大音乐和视频网站检索歌曲。目前支持 咪咕、网易云、QQ 音乐、酷狗、bilibili 等站点。详情可以在我的 [media-get](https://github.com/foamzou/media-get#%E6%94%AF%E6%8C%81%E7%9A%84%E7%BD%91%E7%AB%99) 项目中查看
+- 移动端适配良好（支持 PWA）
 - 用链接搜索歌曲
 - 一键“解锁”无法播放的歌曲（实验性功能，目前仅支持网易云）
 
@@ -29,6 +30,12 @@
      DOCKER_BUILDKIT=1 docker build -t melody .
      docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile melody
      ```
+3. 后续更新（以从 hub.docker.com 更新为例）
+   ```
+   docker pull docker.io/foamzou/melody:latest
+   docker kill <CONTAINER ID>
+   docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile foamzou/melody:latest
+   ```
 
 ### 方式二：源码安装
 
@@ -95,23 +102,50 @@ A: 两种方式。1: 重启服务。2: 网页端 `我的音乐账号` tab 下，
 当某首歌自动解锁失败后，还可以手动点击搜索按钮，找到符合的歌曲后，手动点击上传按钮
 <img src="./imgs/4-playlist-search.png" width="1000" ></img>
 
+### 移动端适配
+<div>
+   <img src="./imgs/mobile-1.png" width="200" ></img>
+   <img src="./imgs/mobile-2.png" width="200" ></img>
+</div>
+<div>
+   <img src="./imgs/mobile-3.png" width="200" ></img>
+   <img src="./imgs/mobile-4.png" width="200" ></img>
+</div>
+
+
 ## Roadmap
 
 计划在后面支持以下功能
 
-- [ ] 页面适配移动端
+- [x] 页面适配移动端
 - [ ] 浏览器油猴脚本
 - [ ] 云盘歌曲 match 手动纠错
 - [ ] 支持播放列表
-- [ ] 支持播放云盘的歌曲
+- [x] 支持播放云盘的歌曲
 - [x] 支持 docker 部署
 - [ ] 支持 youtube-dl,you-dl 等工具作为输入源
 - [ ] 支持 酷狗、qq 音乐等音乐平台的云盘作为输出
 - [ ] 偏好设置
 - [ ] 版本更新提示
 
+## Q & A
+1. Q：移动端版本，为什么点击下载歌曲，会跳新的页面？
+
+   A：有的浏览器不支持嗅探的，会有这个问题。因为外部资源文件都不允许跨域，无法用常规下载方式 save as。考虑后续 hack
+2. Q：移动端版本，为什么在数据网络无法播放歌曲？
+
+   A：发现某些网络下，没有触发 `canplaythrough` 事件，wifi 环境下一般是没有问题的。
+3. Q：为什么移动端 PWA，点击跳转到其他页面时，无法返回到原来页面？
+
+   A：PWA 在移动端不支持使用外部浏览器打开外链，只能在应用内打开，因此会有各种奇怪问题。此时，只能先杀死应用。
+
+4. Q：为什么我部署的服务，PWA 始终出不了？
+
+   A：PWA 要求服务必须是 HTTPS。
+
 ## Change log
 
+- 2022/08/07: 适配移动端（支持 PWA）；支持播放云盘歌曲；修复若干体验问题
 - 2022/05/27: 支持国际电话区号、邮箱登录网易云
 - 2022/05/08: 支持 docker 部署，修复了一些小 bug
 - 2022/05/04: 发布 MVP 版本
