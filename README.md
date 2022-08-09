@@ -10,10 +10,12 @@
 
 ## Feature
 
-- 支持在各大音乐和视频网站检索歌曲。目前支持 咪咕、网易云、QQ 音乐、酷狗、bilibili 等站点。详情可以在我的 [media-get](https://github.com/foamzou/media-get#%E6%94%AF%E6%8C%81%E7%9A%84%E7%BD%91%E7%AB%99) 项目中查看
-- 移动端适配良好（支持 PWA）
-- 用链接搜索歌曲
+- 支持在各大音乐和视频网站检索歌曲。目前支持 咪咕、网易云、QQ 音乐、酷狗、bilibili、抖音等站点。详情可以在我的 [media-get](https://github.com/foamzou/media-get#%E6%94%AF%E6%8C%81%E7%9A%84%E7%BD%91%E7%AB%99) 项目中查看
+- 支持一键下载到本地，一键上传到云盘
+- 用链接搜索歌曲（例如使用 b站或抖音的视频链接进行搜索，可以将对应的音频自动上传到音乐云盘）
 - 一键“解锁”无法播放的歌曲（实验性功能，目前仅支持网易云）
+- PC 端、移动端适配良好（支持 PWA）
+- 部署简单，支持 docker
 
 ## 安装和启动
 
@@ -100,12 +102,12 @@ A: 两种方式。1: 重启服务。2: 网页端 `我的音乐账号` tab 下，
 
 ### 移动端适配
 <div>
-   <img src="./imgs/mobile-1.png" width="200" ></img>
-   <img src="./imgs/mobile-2.png" width="200" ></img>
+   <img src="./imgs/mobile-1.png" width="300" ></img>
+   <img src="./imgs/mobile-2.png" width="300" ></img>
 </div>
-<div>
-   <img src="./imgs/mobile-3.png" width="200" ></img>
-   <img src="./imgs/mobile-4.png" width="200" ></img>
+<div style="margin-top:30px;">
+   <img src="./imgs/mobile-3.png" width="300" ></img>
+   <img src="./imgs/mobile-4.png" width="300" ></img>
 </div>
 
 
