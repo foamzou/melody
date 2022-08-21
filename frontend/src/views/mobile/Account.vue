@@ -78,6 +78,7 @@
               v-model="account.loginType"
               direction="horizontal"
             >
+              <van-radio name="qrcode">扫码登录</van-radio>
               <van-radio name="phone">手机号登录</van-radio>
               <van-radio name="email">邮箱登录</van-radio>
             </van-radio-group>
@@ -85,24 +86,27 @@
         </van-row>
         <van-row style="margin-top: 20px">
           <van-col :offset="3">
-            <van-field
-              v-if="account.loginType == 'phone'"
-              label="国际电话区号"
-              type="digit"
-              v-model="account.countryCode"
-              placeholder="默认86，不需要输入 +"
-              maxlength="4"
-            ></van-field>
-            <van-field label="账号" v-model="account.account"></van-field>
-            <van-field
-              label="密码"
-              v-model="account.password"
-              type="password"
-            ></van-field>
+            <p v-if="account.loginType != 'qrcode'">
+              <van-field
+                v-if="account.loginType == 'phone'"
+                label="国际电话区号"
+                type="digit"
+                v-model="account.countryCode"
+                placeholder="默认86，不需要输入 +"
+                maxlength="4"
+              ></van-field>
+              <van-field label="账号" v-model="account.account"></van-field>
+              <van-field
+                label="密码"
+                v-model="account.password"
+                type="password"
+              ></van-field>
+            </p>
+            <p v-else>扫码仅支持在 PC 端操作</p>
           </van-col>
         </van-row>
 
-        <van-row>
+        <van-row v-if="account.loginType != 'qrcode'">
           <van-col :offset="8" style="margin-top: 20px">
             <van-button round type="success" @click="updateAccount">
               更新账号密码

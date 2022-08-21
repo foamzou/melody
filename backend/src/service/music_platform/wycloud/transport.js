@@ -10,13 +10,15 @@ const LoginTypeEmail = 'email';
 
 const CookieMap = {};
 
-module.exports = async function requestApi(uid, moduleFunc, request = {}) {
-    let cookie = await getCookie(uid);
-    if (!cookie) {
-        logger.error(`uid(${uid}) get cookie failed`);
-        return false;
+async function requestApi(uid, moduleFunc, request = {}, cookieRequired = true) {
+    if (cookieRequired) {
+        let cookie = await getCookie(uid);
+        if (!cookie) {
+            logger.error(`uid(${uid}) get cookie failed`);
+            return false;
+        }
+        request.cookie = cookie;
     }
-    request.cookie = cookie;
 
     let response = await requestWyyApi(moduleFunc, request);
     // need refresh
@@ -95,7 +97,11 @@ async function getCookie(uid, refresh = false) {
             password: account.password,
         });
     } else {
-        logger.error(`uid(${uid})'s loginType(${account.loginType}) does not support now`);
+        if (account.loginType === 'qrcode') {
+            logger.error(`uid(${uid})'s loginType(${account.loginType}) does not support auto login, please login in the browser page first`);
+        } else {
+            logger.error(`uid(${uid})'s loginType(${account.loginType}) does not support now`);
+        }
         return false;
     }
 
@@ -137,4 +143,9 @@ function getCookieMapKey(uid, account) {
 
 function getCookieFilePath(uid, account) {
     return `${CookiePath}${uid}-${account.platform}-${account.account}`;
+}
+
+module.exports = {
+    requestApi,
+    storeCookie,
 }

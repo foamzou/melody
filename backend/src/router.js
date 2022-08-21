@@ -24,5 +24,7 @@ router.get('/api/playlists/:source/:id/songs', asyncWrapper(Playlists.listSongsF
 
 router.get('/api/account', asyncWrapper(Account.get));
 router.post('/api/account', asyncWrapper(Account.set));
+router.get('/api/account/qrlogin-create', asyncWrapper(Account.qrLoginCreate));
+router.get('/api/account/qrlogin-check', asyncWrapper(Account.qrLoginCheck));
 
 module.exports = router;
