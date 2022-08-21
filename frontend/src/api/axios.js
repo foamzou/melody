@@ -59,7 +59,6 @@ axiosApiInstance.interceptors.response.use(
                     params: data,
                 })
                 .then(res => {
-                    console.log(res)
                     resolve(res ? res.data : false)
                 })
                 .catch(err => {

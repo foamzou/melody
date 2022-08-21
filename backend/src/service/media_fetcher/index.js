@@ -34,7 +34,7 @@ async function fetchWithUrl(url, {
     const downloadPath = `${fileBasePath}/${songName ? songName : requestHash}.mp3`;
     logger.info(`start parse and download from ${url}`);
 
-    let args = ['-u', `"${url}"`, '--out', `"${downloadPath}"`, '-t', 'audio', `${addMediaTag ? '--addMediaTag' : ''}`];
+    let args = ['-u', `"${url}"`, '--out', `${downloadPath}`, '-t', 'audio', `${addMediaTag ? '--addMediaTag' : ''}`];
 
     logger.info(`${getBinPath()} ${args.join(' ')}`);
 

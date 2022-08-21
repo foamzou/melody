@@ -1,12 +1,12 @@
 const logger = require('consola');
 const {
     cloud, cloudsearch, cloud_match, song_detail, song_url,
-    user_playlist, playlist_detail, user_account, playlist_track_all
+    user_playlist, playlist_detail, user_account, playlist_track_all,
+    login_qr_check, login_qr_create, login_qr_key,
 } = require('NeteaseCloudMusicApi');
 const fs = require('fs');
 const path = require('path');
-const requestApi = require('./transport');
-const { resolve } = require('path');
+const {requestApi} = require('./transport');
 
 async function uploadSong(uid, filePath) {
     const response = await safeRequest(uid, cloud, {
@@ -241,9 +241,37 @@ async function getBlockedSongsFromPlaylist(uid, source, playlistId) {
     return info;
 }
 
-async function safeRequest(uid, moduleFunc, params) {
+async function qrLoginCreate(uid) {
+    const keyResponse = await safeRequest(uid, login_qr_key, {}, false);
+    if (keyResponse === false || !keyResponse.data.unikey) {
+        logger.warn(`uid(${uid}) get qr login key failed.`);
+        return false;
+    }
+    const qrKey = keyResponse.data.unikey;
+    const qrCodeResponse = await safeRequest(uid, login_qr_create, {key: qrKey, qrimg: true}, false);
+    if (qrCodeResponse === false || !qrCodeResponse.data.qrimg) {
+        return false;
+    }
+    return {
+        qrKey,
+        qrCode: qrCodeResponse.data.qrimg,
+    };
+}
+
+async function qrLoginCheck(uid, qrKey) {
+    const response = await safeRequest(uid, login_qr_check, {key: qrKey}, false);
+    if (response === false) {
+        return false;
+    }
+    return {
+        code: response.code,
+        cookie: response.cookie,
+    };
+}
+
+async function safeRequest(uid, moduleFunc, params, cookieRequired = true) {
     try {
-        const response = await requestApi(uid, moduleFunc, params);
+        const response = await requestApi(uid, moduleFunc, params, cookieRequired);
         if (response == false) {
             logger.error(`request failed.`, response);
             return false;
@@ -265,4 +293,6 @@ module.exports = {
     getUserAllPlaylist: getUserAllPlaylist,
     getSongInfo: getSongInfo,
     getPlayUrl: getPlayUrl,
+    qrLoginCreate: qrLoginCreate,
+    qrLoginCheck: qrLoginCheck,
 }

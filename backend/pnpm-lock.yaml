@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  NeteaseCloudMusicApi: ^4.6.7
+  NeteaseCloudMusicApi: 4.6.7
   body-parser: ^1.19.1
   consola: ^2.15.3
   cors: ^2.8.5
@@ -138,7 +138,7 @@ packages:
     dev: true
 
   /array-flatten/1.1.1:
-    resolution: {integrity: sha1-ml9pkFGx5wczKPKgCJaLZOopVdI=}
+    resolution: {integrity: sha512-PCVAQswWemu6UdxsDFFX/+gVeYqKAod3D3UVm91jHwynguOwAvYPhx8nNlM++NqRcK6CxxpUafjmhIdKiHibqg==}
     dev: false
 
   /ast-types/0.13.4:
