@@ -210,6 +210,7 @@ import { secondDurationToDisplayDuration, sourceCodeToName } from "../../utils";
 import SearchResultTable from "../../components/SearchResultTable.vue";
 import { startTaskListener } from "../../components/TaskNotification";
 import { ref } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   data: () => {
@@ -271,12 +272,28 @@ export default {
   },
   methods: {
     async unblockThePlaylist(playlistId) {
-      const ret = await createSyncSongFromPlaylistJob(playlistId);
-      console.log(ret);
+      ElMessageBox.confirm(
+        "【智能解锁全部】是一个实验性功能，会根据歌曲名和歌手尝试寻找最合适的来源，但也可能会有货不对版的情况，请谨慎使用。你也可以点击下边单首歌曲的搜索图标进入搜索页面，进行手动解锁",
+        "Warning",
+        {
+          confirmButtonText: "解锁全部",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).then(async () => {
+        // on confirm
+        ElMessage({
+          message: "开始解锁歌单",
+          type: "info",
+          duration: 1000,
+        });
+        const ret = await createSyncSongFromPlaylistJob(playlistId);
+        console.log(ret);
 
-      if (ret.data && ret.data.jobId) {
-        startTaskListener(ret.data.jobId);
-      }
+        if (ret.data && ret.data.jobId) {
+          startTaskListener(ret.data.jobId);
+        }
+      });
     },
     async unblockTheSong(songId) {
       const ret = await createSyncSongWithSongIdJob(songId);
