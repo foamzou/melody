@@ -62,16 +62,26 @@ async function qrLoginCreate(req, res) {
 async function qrLoginCheck(req, res) {
     // 800 为二维码过期; 801 为等待扫码; 802 为待确认; 803 为授权登录成功
     const loginCheckRet = await WYAPI.qrLoginCheck(req.account.uid, req.query.qrKey);
+    let account = false;
     if (loginCheckRet.code == 803) {
         // it's a bad design to export the transport function here. Let's refactor it at a good time.
         // should be put the cookie method to a cookie manager service
+        req.account.loginType = 'qrcode';
+        req.account.account = 'temp';
         storeCookie(req.account.uid, req.account, loginCheckRet.cookie);
+        
+        account = await getWyAccountInfo(req.account.uid);
+        req.account.account = account.wyAccount.userId;
+        storeCookie(req.account.uid, req.account, loginCheckRet.cookie);
+
+        AccountService.setAccount(req.account.uid, 'qrcode', account.wyAccount.userId, '');
+        account = await getWyAccountInfo(req.account.uid);
     }
     res.send({
         status: loginCheckRet ? 0 : 1,
         data: {
             wyQrStatus: loginCheckRet.code,
-            account: loginCheckRet.code == 803 ? await getWyAccountInfo(req.account.uid) : false
+            account
         }
     });
 }
