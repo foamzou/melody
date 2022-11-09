@@ -63,6 +63,9 @@ function getMediaGetRemoteFilename(latestVersion) {
     }
     if (isDarwin) {
         suffix = 'darwin';
+        if (process.arch === 'x64') {
+            suffix += '-arm64';
+        }
     }
     if (process.arch === 'arm64') {
         suffix += '-arm64';
