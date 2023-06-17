@@ -196,14 +196,19 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
     });
 
     const isBlockedSong = (song, songInfo) => {
+        // the song has been added to cloud if the pc field is present
+        if (songInfo.pc) {
+            return false;
+        } 
+        
+        if (song.fee === 1) {
+            return true;
+        }
         // blocked or need to pay: subp == 0 && realpayed !== 1
         if (song.subp != 0 || song.realPayed === 1) {
             return false;
         }
-        // the song has been added to cloud if the pc field is present
-        if (songInfo.pc) {
-            return false;
-        }
+
         return true;
     };
 
