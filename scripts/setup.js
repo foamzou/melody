@@ -6,6 +6,7 @@ const isWin = require('os').platform().indexOf('win32') > -1;
 const isLinux = require('os').platform().indexOf('linux') > -1;
 const isDarwin = require('os').platform().indexOf('darwin') > -1;
 const ROOT_DIR = `${__dirname}/../`;
+const MediaGetService = require('../backend/src/service/media_fetcher/media_get');
 const l = m => console.log(m);
 
 const runCmd = (cmd, shouldOutput = true, cwd = null) => {
@@ -85,20 +86,20 @@ async function downloadFile(url, filename) {
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function getLatestMediaGetVersion() {
-    const latestVerisonUrl = 'https://ghproxy.com/https://raw.githubusercontent.com/foamzou/media-get/main/LATEST_VERSION';
-    // download the file
-    const latestVersion = await asyncHttpsGet(latestVerisonUrl);
-    if (latestVersion === null || (latestVersion || "").split('.').length !== 3) {
-        l('获取 media-get 最新版本号失败, got: ' + latestVersion);
-        return false;
-    }
-    return latestVersion;
-}
+// async function getLatestMediaGetVersion() {
+//     const latestVerisonUrl = 'https://ghproxy.com/https://raw.githubusercontent.com/foamzou/media-get/main/LATEST_VERSION';
+//     // download the file
+//     const latestVersion = await asyncHttpsGet(latestVerisonUrl);
+//     if (latestVersion === null || (latestVersion || "").split('.').length !== 3) {
+//         l('获取 media-get 最新版本号失败, got: ' + latestVersion);
+//         return false;
+//     }
+//     return latestVersion;
+// }
 
 async function downloadTheLatestMediaGet(latestVersion = "") {
     if (!latestVersion) {
-        latestVersion = await getLatestMediaGetVersion();
+        latestVersion = await MediaGetService.getLatestMediaGetVersion();
         if (latestVersion === false) {
             return false;
         }
@@ -112,7 +113,7 @@ async function downloadTheLatestMediaGet(latestVersion = "") {
 }
 
 async function checkAndUpdateMediaGet(currentMediaGetVersion) {
-    const latestVersion = await getLatestMediaGetVersion();
+    const latestVersion = await MediaGetService.getLatestMediaGetVersion();
     if (latestVersion === false) {
         return;
     }

@@ -67,6 +67,9 @@
           <el-col :span="3">
             <el-link type="primary" @click="account()">我的音乐账号</el-link>
           </el-col>
+          <el-col :span="3">
+            <el-link type="primary" @click="setting()">设置</el-link>
+          </el-col>
         </el-row>
       </el-header>
       <router-view
@@ -208,6 +211,9 @@ export default {
     },
     playlist() {
       this.$router.push("/playlist");
+    },
+    setting() {
+      this.$router.push("/setting");
     },
     async playTheSong(metaInfo, pageUrl, suggestMatchSongId) {
       console.log("------------------------");

@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory, createWebHashHistory } from "vue-router"
 import storage from "../utils/storage"
 
+const PathPlaylist = '/playlist';
+const PathSetting = '/setting';
+
 const routes = [
     {
         path: '/',
@@ -12,9 +15,14 @@ const routes = [
         component: () => import('../views/pc/Account.vue')   
     },
     {
-        path: '/playlist',
+        path: PathPlaylist,
         name: "Playlist",
         component: () => import('../views/pc/Playlist.vue')   
+    },
+    {
+        path: PathSetting,
+        name: "Setting",
+        component: () => import('../views/pc/Setting.vue')   
     },
 ]
 export const router = createRouter({
@@ -32,7 +40,7 @@ router.beforeEach((to, from, next) => {
     if (!mk) {
         next("/account");
     }
-    if (to.path === "/playlist" && !wyAccount) {
+    if ([PathPlaylist, PathSetting].includes(to.path) && !wyAccount) {
         next("/account");
         return;
     }

@@ -42,7 +42,7 @@ module.exports = async function() {
         logger.error('please install FFmpeg and FFprobe first');
         process.exit(-1);
     }
-    logger.info(`[media-get] ${mediaGetInfo.versionInfo}`);
+    logger.info(`[media-get] Version: ${mediaGetInfo.versionInfo}`);
 
     // TODO check media-get latest version
 }

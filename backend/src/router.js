@@ -5,6 +5,7 @@ const Songs = require('./handler/songs');
 const SongMeta = require('./handler/song_meta');
 const Playlists = require('./handler/playlists');
 const Account = require('./handler/account');
+const MediaFetcherLib = require('./handler/media_fetcher_lib');
 
 const asyncWrapper = (cb) => {
     return (req, res, next) => cb(req, res, next).catch(next);
@@ -26,5 +27,8 @@ router.get('/api/account', asyncWrapper(Account.get));
 router.post('/api/account', asyncWrapper(Account.set));
 router.get('/api/account/qrlogin-create', asyncWrapper(Account.qrLoginCreate));
 router.get('/api/account/qrlogin-check', asyncWrapper(Account.qrLoginCheck));
+
+router.get('/api/media-fetcher-lib/version-check', asyncWrapper(MediaFetcherLib.checkLibVersion));
+router.post('/api/media-fetcher-lib/update', asyncWrapper(MediaFetcherLib.downloadTheLatestLib));
 
 module.exports = router;
