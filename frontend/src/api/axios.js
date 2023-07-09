@@ -8,7 +8,7 @@ axiosApiInstance.defaults.baseURL = import.meta.env.VITE_APP_API_URL
 //允许跨域携带cookie信息
 axiosApiInstance.defaults.withCredentials = true; 
 //设置超时
-axiosApiInstance.defaults.timeout = 5000;
+axiosApiInstance.defaults.timeout = 10000;
 
 axiosApiInstance.interceptors.request.use(
     config => {
