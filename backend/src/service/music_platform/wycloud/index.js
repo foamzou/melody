@@ -196,8 +196,8 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
     });
 
     const isBlockedSong = (song, songInfo) => {
-        // blocked or need to pay: subp == 0 && realpayed !== 1
-        if (song.subp != 0 || song.realPayed === 1) {
+        // blocked or need to pay
+        if (song.fee === 8 || song.payed === 1) {
             return false;
         }
         // the song has been added to cloud if the pc field is present
