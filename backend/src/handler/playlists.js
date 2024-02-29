@@ -1,6 +1,6 @@
 const logger = require('consola');
 const { getUserAllPlaylist, getSongsFromPlaylist } = require('../service/music_platform/wycloud');
-const Source = require('../consts/source');
+const Source = require('../consts/source').consts;
 
 async function listAllPlaylists(req, res) {
     const uid = req.account.uid;
@@ -22,7 +22,7 @@ async function listSongsFromPlaylist(req, res) {
     const source = req.params.source;
     const playlistId = req.params.id;
 
-    if (source !== Source.Netease || !playlistId) {
+    if (source !== Source.Netease.code || !playlistId) {
         res.send({
             status: 1,
             message: "source or id is invalid",

@@ -46,3 +46,8 @@ export const updateMediaFetcherLib = (version) => {
         "version": version,
     });
 };
+
+export const getGlobalConfig = _ => get("/config/global", {});
+export const setGlobalConfig = (config) => {
+    return post("/config/global", config);
+};

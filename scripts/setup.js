@@ -86,17 +86,6 @@ async function downloadFile(url, filename) {
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// async function getLatestMediaGetVersion() {
-//     const latestVerisonUrl = 'https://ghproxy.com/https://raw.githubusercontent.com/foamzou/media-get/main/LATEST_VERSION';
-//     // download the file
-//     const latestVersion = await asyncHttpsGet(latestVerisonUrl);
-//     if (latestVersion === null || (latestVersion || "").split('.').length !== 3) {
-//         l('获取 media-get 最新版本号失败, got: ' + latestVersion);
-//         return false;
-//     }
-//     return latestVersion;
-// }
-
 async function downloadTheLatestMediaGet(latestVersion = "") {
     if (!latestVersion) {
         latestVersion = await MediaGetService.getLatestMediaGetVersion();

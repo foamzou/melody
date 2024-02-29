@@ -1,7 +1,7 @@
 const logger = require('consola');
 const { unblockMusicInPlaylist, unblockMusicWithSongId } = require('../service/sync_music');
 const JobType = require('../consts/job_type');
-const Source = require('../consts/source');
+const Source = require('../consts/source').consts;
 const { matchUrlFromStr } = require('../utils/regex');
 const { syncSingleSongWithUrl } = require('../service/sync_music');
 const findTheBestMatchFromWyCloud = require('../service/search_songs/find_the_best_match_from_wycloud');
@@ -21,7 +21,7 @@ async function createJob(req, res) {
         const source = request.playlist && request.playlist.source;
         const playlistId = request.playlist && request.playlist.id;
 
-        if (source !== Source.Netease || !playlistId) {
+        if (source !== Source.Netease.code || !playlistId) {
             res.status(429).send({
                 status: 1,
                 message: "source or id is invalid",
@@ -33,7 +33,7 @@ async function createJob(req, res) {
         const source = request.source;
         const songId = request.songId;
 
-        if (source !== Source.Netease || !songId) {
+        if (source !== Source.Netease.code || !songId) {
             res.status(429).send({
                 status: 1,
                 message: "source or id is invalid",
