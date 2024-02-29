@@ -1,5 +1,5 @@
 const logger = require('consola');
-const asyncFs = require('./fs');
+const asyncFs = require('../../utils/fs');
 const genUUID = require('../../utils/uuid');
 const { lock, unlock } = require('../../utils/simple_locker');
 const JobStatus = require('../../consts/job_status');

@@ -4,6 +4,7 @@ const md5 = require('md5');
 const path = require('path');
 const cmd = require('../../utils/cmd');
 const fs = require('fs');
+const configManager = require('../config_manager')
 
 const { getBinPath } = require('./media_get');
 
@@ -92,10 +93,18 @@ async function searchSongFromAllPlatform({
 }) {
     logger.info(`searchSong with ${JSON.stringify(arguments)}`);
 
+    const globalConfig = await configManager.getGlobalConfig();
+
     let searchParams = keyword 
         ? ['-k', `"${keyword}"`] 
         : ['--searchSongName', `"${songName}"`, '--searchArtist', `"${artist}"`, '--searchAlbum', `"${album}"`];
-    searchParams = searchParams.concat(['--searchType="song"', '-m', '--infoFormat=json', '-l', 'silence']);
+    searchParams = searchParams.concat([
+        '--searchType="song"',
+        '-m',
+        `--sources=${globalConfig.sources.join(',')}`,
+        '--infoFormat=json',
+        '-l', 'silence'
+    ]);
 
     logger.info(`cmdStr: ${getBinPath()} ${searchParams.join(' ')}`);
 
