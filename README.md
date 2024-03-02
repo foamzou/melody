@@ -110,7 +110,6 @@ A: 两种方式。1: 重启服务。2: 网页端 `我的音乐账号` tab 下，
    <img src="./imgs/mobile-4.png" width="300" ></img>
 </div>
 
-
 ## Roadmap
 
 计划在后面支持以下功能
@@ -140,6 +139,10 @@ A: 两种方式。1: 重启服务。2: 网页端 `我的音乐账号` tab 下，
 4. Q：为什么我部署的服务，PWA 始终出不了？
 
    A：PWA 要求服务必须是 HTTPS。
+
+5. Q: 为什么更新 media-get 组件后，搜索报错
+   
+   A: 目前存在 bug，更新完 media-get 组件之后，请务必重启 docker 容器或服务，否则将无法继续使用
 
 ## Change log
 见 [Release](https://github.com/foamzou/melody/releases)
