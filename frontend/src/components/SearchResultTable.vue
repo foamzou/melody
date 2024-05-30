@@ -35,7 +35,6 @@
             @click="play(null, scope.row.url)"
             :underline="false"
             :disabled="
-              scope.row.url.indexOf('bilibili') >= 0 ||
               scope.row.url.indexOf('youtube') >= 0
             "
             type="primary"

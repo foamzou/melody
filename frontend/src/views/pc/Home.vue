@@ -182,7 +182,12 @@
 </template>
 
 <script>
-import { searchSongs, getSongsMeta, createSyncSongFromUrlJob } from "../../api";
+import {
+  searchSongs,
+  getSongsMeta,
+  createSyncSongFromUrlJob,
+  getGlobalConfig,
+} from "../../api";
 import SearchResultTable from "../../components/SearchResultTable.vue";
 import { secondDurationToDisplayDuration, sourceCodeToName } from "../../utils";
 import { startTaskListener } from "../../components/TaskNotification";
@@ -199,6 +204,7 @@ export default {
       isSearching: false,
       searchResult: [],
       wyAccount: null,
+      globalConfig: null,
     };
   },
   props: {
@@ -211,12 +217,16 @@ export default {
       required: true,
     },
   },
-  mounted() {
+  async mounted() {
     this.wyAccount = storage.get("wyAccount");
+    this.loadGlobalConfig();
   },
   watch: {
     $route(to, from) {
       this.wyAccount = storage.get("wyAccount");
+      if (to.path === "/" || to.path === "/home" || to.path === "") {
+        this.loadGlobalConfig();
+      }
     },
   },
   setup(props, { emit }) {
@@ -241,6 +251,12 @@ export default {
 
       if (ret.data && ret.data.jobId) {
         startTaskListener(ret.data.jobId);
+      }
+    },
+    async loadGlobalConfig() {
+      const globalConfig = await getGlobalConfig();
+      if (globalConfig !== false && globalConfig.data) {
+        this.globalConfig = globalConfig.data;
       }
     },
     async onSearch() {

@@ -22,7 +22,7 @@
       <!-- 本地下载路径配置 -->
       <el-row justify="center">
         <el-col :span="16">
-          <h3>本地下载路径配置（本地下载功能暂不支持，下个版本会上线，时间无法确定）</h3>
+          <h3>本地下载路径配置</h3>
           <div>
             下载路径格式。Mac/Linux: /path/to/... | Windows:
             C:\Users\YourUserName\Downloads
@@ -91,8 +91,6 @@ export default {
       this.downloadPath = globalConfig.data.downloadPath;
       this.supportedSources = Object.values(globalConfig.data.sourceConsts);
       this.checkedSources = globalConfig.data.sources;
-      console.log(this.supportedSources);
-      console.log(this.checkedSources);
     }
     this.checklib();
   },
