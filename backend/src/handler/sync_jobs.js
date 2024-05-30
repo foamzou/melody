@@ -41,7 +41,7 @@ async function createJob(req, res) {
             return;
         }
         jobId = await unblockMusicWithSongId(uid, source, songId)
-    } else if (jobType === JobType.SyncSongFromUrl) {
+    } else if (jobType === JobType.SyncSongFromUrl || jobType === JobType.DownloadSongFromUrl) {
         const request = req.body;
         const url = request.urlJob && matchUrlFromStr(request.urlJob.url);
 
@@ -83,28 +83,29 @@ async function createJob(req, res) {
         }
     
         // create job
-        const args = `SyncSongFromUrl: {"url":${url}}`;
+        const args = `${jobType}: {"url":${url}}`;
         if (await JobManager.findActiveJobByArgs(uid, args)) {
-            logger.info(`SyncSongFromUrl job is already running.`);
+            logger.info(`${jobType} job is already running.`);
             jobId = BusinessCode.StatusJobAlreadyExisted;
         } else {
+            const operation = jobType === JobType.SyncSongFromUrl ? "上传" : "下载";
             jobId = await JobManager.createJob(uid, {
-                name: `上传歌曲：${meta.songName ? meta.songName : url}`,
+                name: `${operation}歌曲：${meta.songName ? meta.songName : url}`,
                 args,
-                type: JobType.SyncSongFromUrl,
+                type: jobType,
                 status: JobStatus.Pending,
                 desc: `歌曲：${meta.songName ? meta.songName : url}`,
                 progress: 0,
-                tip: "等待上传",
+                tip: `等待${operation}`,
                 createdAt: Date.now()
             });
     
             // async job
-            syncSingleSongWithUrl(req.account.uid, url, meta, jobId).then(async ret => {
+            syncSingleSongWithUrl(req.account.uid, url, meta, jobId, jobType).then(async ret => {
                 await JobManager.updateJob(uid, jobId, {
-                    status: ret ? JobStatus.Finished : JobStatus.Failed,
+                    status: ret === true ? JobStatus.Finished : JobStatus.Failed,
                     progress: 1,
-                    tip: ret ? "上传成功" : "上传失败",
+                    tip: ret === true ? `${operation}成功` : `${operation}失败`,
                 });
             })
         }

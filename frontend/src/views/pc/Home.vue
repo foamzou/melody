@@ -142,6 +142,32 @@
                           ></i>
                         </el-link>
                       </el-tooltip>
+
+                      <!-- download to service local -->
+                      <el-tooltip
+                        :content="
+                          globalConfig.downloadPathExisted
+                            ? '下载到服务器'
+                            : '下载到服务器(请先配置下载路径)'
+                        "
+                        placement="bottom"
+                      >
+                        <el-link
+                          @click="downloadToLocalService(songMetaInfo.pageUrl)"
+                          :underline="false"
+                          :disabled="!globalConfig.downloadPathExisted ? true : false"
+                          style="
+                            color: white;
+                            margin-left: 20px;
+                            margin-top: 6px;
+                          "
+                        >
+                          <i
+                            class="bi bi-cloud-download"
+                            style="font-size: 40px"
+                          ></i>
+                        </el-link>
+                      </el-tooltip>
                     </el-col>
                   </el-row>
                 </div>

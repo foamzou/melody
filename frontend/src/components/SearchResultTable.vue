@@ -34,9 +34,7 @@
             v-if="scope.row.url != currentSongUrl"
             @click="play(null, scope.row.url)"
             :underline="false"
-            :disabled="
-              scope.row.url.indexOf('youtube') >= 0
-            "
+            :disabled="scope.row.url.indexOf('youtube') >= 0"
             type="primary"
           >
             <i class="bi bi-play-circle" style="font-size: 20px"></i>
@@ -59,6 +57,26 @@
             <i class="bi bi-cloud-upload" style="font-size: 20px"></i>
           </el-link>
         </el-tooltip>
+
+        <el-tooltip
+          :content="
+            globalConfig.downloadPathExisted
+              ? '下载到服务器'
+              : '下载到服务器(请先配置下载路径)'
+          "
+          placement="top"
+        >
+          <el-link
+            type="primary"
+            @click="downloadToLocalService(scope.row.url)"
+            :disabled="!globalConfig.downloadPathExisted ? true : false"
+            :underline="false"
+            style="margin-left: 20px"
+          >
+            <i class="bi bi-cloud-download" style="font-size: 20px"></i>
+          </el-link>
+        </el-tooltip>
+
         <el-tooltip content="在源站查看" placement="top">
           <a
             type="primary"
@@ -75,7 +93,11 @@
 </template>
 
 <script>
-import { createSyncSongFromUrlJob } from "../api";
+import {
+  createSyncSongFromUrlJob,
+  createDownloadSongFromUrlJob,
+  getGlobalConfig,
+} from "../api";
 import { startTaskListener } from "../components/TaskNotification";
 import storage from "../utils/storage";
 
@@ -84,6 +106,7 @@ export default {
     return {
       currentSongUrl: -1,
       wyAccount: null,
+      globalConfig: {},
     };
   },
   props: {
@@ -106,6 +129,7 @@ export default {
   },
   mounted() {
     this.wyAccount = storage.get("wyAccount");
+    this.loadGlobalConfig();
   },
   setup(props, { emit }) {
     const playTheSong = (songMeta, pageUrl, suggestMatchSongId) => {
@@ -122,6 +146,9 @@ export default {
   watch: {
     $route(to, from) {
       this.wyAccount = storage.get("wyAccount");
+      if (to.path === "/" || to.path === "/home" || to.path === "") {
+        this.loadGlobalConfig();
+      }
     },
   },
   methods: {
@@ -134,6 +161,23 @@ export default {
 
       if (ret.data && ret.data.jobId) {
         startTaskListener(ret.data.jobId);
+      }
+    },
+    async downloadToLocalService(pageUrl) {
+      const ret = await createDownloadSongFromUrlJob(
+        pageUrl,
+        this.suggestMatchSongId
+      );
+      console.log(ret);
+
+      if (ret.data && ret.data.jobId) {
+        startTaskListener(ret.data.jobId);
+      }
+    },
+    async loadGlobalConfig() {
+      const globalConfig = await getGlobalConfig();
+      if (globalConfig !== false && globalConfig.data) {
+        this.globalConfig = globalConfig.data;
       }
     },
     play(songMeta, pageUrl) {

@@ -90,7 +90,7 @@ async function syncSingleSongWithMeta(uid, wySongMeta) {
             album: wySongMeta.album,
             songFromWyCloud,
         });
-        if (isUploadSucceed === "uploadFailed") {
+        if (isUploadSucceed === "IOFailed") {
             logger.error(`not try others due to upload failed.`);
             return false;
         }

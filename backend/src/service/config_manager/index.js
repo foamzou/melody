@@ -13,7 +13,8 @@ async function init() {
 init();
 
 const GlobalDefaultConfig = {
-    localDownloadPath: '',
+    downloadPath: '',
+    downloadPathExisted: false,
     // don't search youtube by default
     sources: Object.values(sourceConsts).map(i => i.code).filter(s => s !== sourceConsts.Youtube.code),
     sourceConsts,
@@ -32,6 +33,10 @@ async function getGlobalConfig() {
         config.sources = GlobalDefaultConfig.sources;
     }
     config.sourceConsts = GlobalDefaultConfig.sourceConsts;
+    config.downloadPathExisted = false;
+    if (config.downloadPath) {
+        config.downloadPathExisted = await asyncFs.asyncFileExisted(config.downloadPath);
+    }
     return config;
 }
 

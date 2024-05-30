@@ -60,9 +60,22 @@ function asyncUnlinkFile(filePath) {
     });
 }
 
+function asyncMoveFile(oldPath, newPath) {
+    return new Promise((resolve, reject) => {
+        fs.rename(oldPath, newPath, (err) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve();
+        });
+    });
+}
+
 module.exports = {
     asyncReadFile,
     asyncWriteFile,
     asyncFileExisted,
     asyncMkdir,
+    asyncMoveFile,
 };

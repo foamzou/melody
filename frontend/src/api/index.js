@@ -23,6 +23,17 @@ export const createSyncSongFromUrlJob = (url, songId = "") => {
         }
     });
 };
+export const createDownloadSongFromUrlJob = (url, songId = "") => {
+    return post("/sync-jobs", {
+        "jobType": "DownloadSongFromUrl",
+        "urlJob": {
+            "url": url,
+            "meta": {
+                "songId": songId
+            }
+        }
+    });
+};
 export const createSyncSongFromPlaylistJob = (playlistId) => {
     return post("/sync-jobs", {
         "jobType": "UnblockedPlaylist",
