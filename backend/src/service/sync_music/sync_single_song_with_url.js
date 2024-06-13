@@ -8,6 +8,7 @@ const JobStatus = require('../../consts/job_status');
 const JobType = require('../../consts/job_type');
 const configManager = require('../config_manager');
 const fs = require('fs');
+const libPath = require('path');
 const utilFs = require('../../utils/fs');
 
 module.exports = async function syncSingleSongWithUrl(uid, url, {
@@ -69,14 +70,27 @@ module.exports = async function syncSingleSongWithUrl(uid, url, {
             logger.error(`download path not set`);
             return "IOFailed";
         }
-        const destPath = `${downloadPath}/${songInfo.album ? songInfo.album+'-' : ''}${songInfo.artist ? songInfo.artist+'-' : ''}${songInfo.songName}.mp3`;
+        let filename = (await configManager.getGlobalConfig()).filenameFormat
+            .replace('{artist}', songInfo.artist ? songInfo.artist : 'Unknown')
+            .replace('{songName}', songInfo.songName ? songInfo.songName : 'Unknown')
+            .replace('{album}', songInfo.album ? songInfo.album : 'Unknown');
+        // remove the head / and \ in filename
+        filename = filename.replace(/^[\/\\]+/, '');
+        const destPathAndFilename = `${downloadPath}${libPath.sep}${filename}.mp3`;
+        const destPath = libPath.dirname(destPathAndFilename);
+        // make sure the path is exist
+        await utilFs.asyncMkdir(destPath, {recursive: true});
         try {
-            await utilFs.asyncMoveFile(path, destPath);
+            if (await utilFs.asyncFileExisted(destPathAndFilename)) {
+                logger.info(`file already exists, remove it: ${destPathAndFilename}`);
+                await utilFs.asyncUnlinkFile(destPathAndFilename)
+            }
+            await utilFs.asyncMoveFile(path, destPathAndFilename);
         } catch (err) {
-            logger.error(`move file failed, ${path} -> ${destPath}`, err);
+            logger.error(`move file failed, ${path} -> ${destPathAndFilename}`, err);
             return "IOFailed";
         }
-        logger.info(`download song success, path: ${destPath}`);
+        logger.info(`download song success, path: ${destPathAndFilename}`);
         return true;
     } else {
         const startTime = new Date();

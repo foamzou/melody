@@ -4,6 +4,7 @@ const DataPath = `${__dirname}/../../../.profile/data`;
 const ConfigPath = `${DataPath}/config`;
 const GlobalConfig = `${ConfigPath}/global.json`;
 const sourceConsts = require('../../consts/source').consts;
+const libPath = require('path');
 
 async function init() {
     if (!await asyncFs.asyncFileExisted(ConfigPath)) {
@@ -14,10 +15,20 @@ init();
 
 const GlobalDefaultConfig = {
     downloadPath: '',
+    filenameFormat: '{album}-{artist}-{songName}',
     downloadPathExisted: false,
     // don't search youtube by default
     sources: Object.values(sourceConsts).map(i => i.code).filter(s => s !== sourceConsts.Youtube.code),
     sourceConsts,
+    playlistSyncToLocal: {
+        autoSync: {
+          enable: false,
+          frequency: 1,
+          frequencyUnit: "day",
+        },
+        deleteLocalFile: false,
+        filenameFormat: `{playlistName}${libPath.sep}{album}-{artist}-{songName}`,
+    },
 };
 
 async function setGlobalConfig(config) {
@@ -36,6 +47,14 @@ async function getGlobalConfig() {
     config.downloadPathExisted = false;
     if (config.downloadPath) {
         config.downloadPathExisted = await asyncFs.asyncFileExisted(config.downloadPath);
+    }
+
+    if (!config.filenameFormat) {
+        config.filenameFormat = GlobalDefaultConfig.filenameFormat;
+    }
+
+    if (!config.playlistSyncToLocal) {
+        config.playlistSyncToLocal = GlobalDefaultConfig.playlistSyncToLocal;
     }
     return config;
 }

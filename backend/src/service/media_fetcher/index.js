@@ -32,6 +32,7 @@ async function fetchWithUrl(url, {
         return false;
     }
 
+    addMediaTag = false; // todo: 等到 media-get fix 偶现的 添加 addMediaTag 后 panic 的问题，再移除这行代码
     const downloadPath = `${fileBasePath}/${songName ? songName : requestHash}.mp3`;
     logger.info(`start parse and download from ${url}`);
 

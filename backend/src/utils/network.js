@@ -3,13 +3,19 @@ const https = require('https');
 function asyncHttpsGet(url) {
     return new Promise((resolve) => {
         https.get(url, res => {
-            res.on('data', data => {
+            let data = '';
+
+            res.on('data', chunk => {
+                data += chunk;
+            });
+
+            res.on('end', () => {
                 resolve(data.toString());
-            })
-            res.on('error', err => {
-                l(err);
-                resolve(null);
-            })
+            });
+
+        }).on('error', err => {
+            console.error(err);
+            resolve(null);
         });
     });
 }

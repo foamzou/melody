@@ -77,5 +77,6 @@ module.exports = {
     asyncWriteFile,
     asyncFileExisted,
     asyncMkdir,
+    asyncUnlinkFile,
     asyncMoveFile,
 };

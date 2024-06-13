@@ -51,9 +51,15 @@
                       songIndex: i,
                     },
                     {
-                      text: '下载到本地',
+                      text: '下载到浏览器本地',
                       icon: 'down',
                       action: ActionDownload,
+                      songIndex: i,
+                    },
+                    {
+                      text: '下载到服务器本地',
+                      icon: 'down',
+                      action: ActionDownloadToLocalService,
                       songIndex: i,
                     },
                     {
@@ -83,7 +89,11 @@
 
 <script>
 import { ref } from "vue";
-import { createSyncSongFromUrlJob, getSongsMeta } from "../api";
+import {
+  createSyncSongFromUrlJob,
+  getSongsMeta,
+  createDownloadSongFromUrlJob,
+} from "../api";
 import { startTaskListener } from "./TaskNotificationForMobile";
 import storage from "../utils/storage";
 import { ellipsis } from "../utils";
@@ -91,6 +101,7 @@ import { ellipsis } from "../utils";
 const ActionUpload = 0;
 const ActionDownload = 1;
 const ActionOpenRef = 2;
+const ActionDownloadToLocalService = 3;
 
 export default {
   data() {
@@ -117,6 +128,7 @@ export default {
     this.ActionUpload = ActionUpload;
     this.ActionDownload = ActionDownload;
     this.ActionOpenRef = ActionOpenRef;
+    this.ActionDownloadToLocalService = ActionDownloadToLocalService;
   },
   mounted() {
     this.wyAccount = storage.get("wyAccount");
@@ -157,6 +169,17 @@ export default {
         startTaskListener(ret.data.jobId);
       }
     },
+    async downloadToLocalService(pageUrl) {
+      const ret = await createDownloadSongFromUrlJob(
+        pageUrl,
+        this.suggestMatchSongId
+      );
+      console.log(ret);
+
+      if (ret.data && ret.data.jobId) {
+        startTaskListener(ret.data.jobId);
+      }
+    },
     play(songMeta, pageUrl, index) {
       if (this.currentSongIndex === index) {
         return;
@@ -170,6 +193,9 @@ export default {
       switch (actionItem.action) {
         case ActionUpload:
           this.uploadToCloud(currentSong.url);
+          break;
+        case ActionDownloadToLocalService:
+          this.downloadToLocalService(currentSong.url);
           break;
         case ActionDownload:
           const ret = await getSongsMeta({ url: currentSong.url });

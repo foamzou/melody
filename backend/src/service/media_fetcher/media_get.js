@@ -31,8 +31,10 @@ async function getMediaGetInfo(isTempBin = false) {
 
 async function getLatestMediaGetVersion() {
     const remoteConfig = await RemoteConfig.getRemoteConfig();
+    // TODO: 这里应当使用多个备用代理地址，每次将成功的保存到本地缓存，下次优先使用
     const latestVerisonUrl = `${remoteConfig.githubProxy}/https://raw.githubusercontent.com/foamzou/media-get/main/LATEST_VERSION`;
     console.log('start to get latest version from: ' + latestVerisonUrl);
+
     const latestVersion = await httpsGet(latestVerisonUrl);
     console.log('latest version: ' + latestVersion);
     if (latestVersion === null || (latestVersion || "").split('.').length !== 3) {
