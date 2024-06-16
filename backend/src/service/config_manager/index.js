@@ -15,7 +15,7 @@ init();
 
 const GlobalDefaultConfig = {
     downloadPath: '',
-    filenameFormat: '{album}-{artist}-{songName}',
+    filenameFormat: '{songName}-{artist}',
     downloadPathExisted: false,
     // don't search youtube by default
     sources: Object.values(sourceConsts).map(i => i.code).filter(s => s !== sourceConsts.Youtube.code),
@@ -27,7 +27,7 @@ const GlobalDefaultConfig = {
           frequencyUnit: "day",
         },
         deleteLocalFile: false,
-        filenameFormat: `{playlistName}${libPath.sep}{album}-{artist}-{songName}`,
+        filenameFormat: `{playlistName}${libPath.sep}{songName}-{artist}`,
     },
 };
 
@@ -55,6 +55,9 @@ async function getGlobalConfig() {
 
     if (!config.playlistSyncToLocal) {
         config.playlistSyncToLocal = GlobalDefaultConfig.playlistSyncToLocal;
+    }
+    if (!config.playlistSyncToLocal.filenameFormat) {
+        config.playlistSyncToLocal.filenameFormat = GlobalDefaultConfig.playlistSyncToLocal.filenameFormat;
     }
     return config;
 }

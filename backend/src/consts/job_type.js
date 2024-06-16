@@ -3,4 +3,5 @@ module.exports = {
     UnblockedSong: "UnblockedSong",
     SyncSongFromUrl: "SyncSongFromUrl",
     DownloadSongFromUrl: "DownloadSongFromUrl",
+    SyncThePlaylistToLocalService: "SyncThePlaylistToLocalService",
 }

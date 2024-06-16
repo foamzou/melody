@@ -1,4 +1,5 @@
 const fs = require('fs');
+const crypto = require('crypto');
 
 function asyncReadFile(filePath) {
     return new Promise((resolve, reject) => {
@@ -60,14 +61,39 @@ function asyncUnlinkFile(filePath) {
     });
 }
 
-function asyncMoveFile(oldPath, newPath) {
+const fsPromise = fs.promises;
+async function asyncMoveFile(oldPath, newPath) {
+    await fsPromise.copyFile(oldPath, newPath)
+    await fsPromise.unlink(oldPath);
+}
+
+function asyncReadDir(dirPath) {
     return new Promise((resolve, reject) => {
-        fs.rename(oldPath, newPath, (err) => {
+        fs.readdir(dirPath, (err, files) => {
             if (err) {
                 reject(err);
                 return;
             }
-            resolve();
+            resolve(files);
+        }
+    )});
+}
+
+async function asyncMd5(filePath) {
+    return new Promise((resolve, reject) => {
+        const hash = crypto.createHash('md5');
+        const stream = fs.createReadStream(filePath);
+
+        stream.on('data', (data) => {
+            hash.update(data);
+        });
+
+        stream.on('end', () => {
+            resolve(hash.digest('hex'));
+        });
+
+        stream.on('error', (error) => {
+            reject(error);
         });
     });
 }
@@ -79,4 +105,6 @@ module.exports = {
     asyncMkdir,
     asyncUnlinkFile,
     asyncMoveFile,
+    asyncReadDir,
+    asyncMd5,
 };

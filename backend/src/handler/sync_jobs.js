@@ -3,7 +3,7 @@ const { unblockMusicInPlaylist, unblockMusicWithSongId } = require('../service/s
 const JobType = require('../consts/job_type');
 const Source = require('../consts/source').consts;
 const { matchUrlFromStr } = require('../utils/regex');
-const { syncSingleSongWithUrl } = require('../service/sync_music');
+const { syncSingleSongWithUrl, syncPlaylist } = require('../service/sync_music');
 const findTheBestMatchFromWyCloud = require('../service/search_songs/find_the_best_match_from_wycloud');
 const JobManager = require('../service/job_manager');
 const JobStatus = require('../consts/job_status');
@@ -17,7 +17,7 @@ async function createJob(req, res) {
     const jobType = request.jobType;
     let jobId = 0;
 
-    if (jobType === JobType.UnblockedPlaylist) {
+    if (jobType === JobType.UnblockedPlaylist || jobType === JobType.SyncThePlaylistToLocalService) {
         const source = request.playlist && request.playlist.source;
         const playlistId = request.playlist && request.playlist.id;
 
@@ -28,7 +28,11 @@ async function createJob(req, res) {
             });
             return;
         }
-        jobId = await unblockMusicInPlaylist(uid, source, playlistId)
+        if (jobType === JobType.UnblockedPlaylist) {
+            jobId = await unblockMusicInPlaylist(uid, source, playlistId)
+        } else {
+            jobId = await syncPlaylist(uid, source, playlistId)
+        }
     } else if (jobType === JobType.UnblockedSong) {
         const source = request.source;
         const songId = request.songId;
@@ -130,6 +134,13 @@ async function createJob(req, res) {
         res.status(429).send({
             status: BusinessCode.StatusJobAlreadyExisted,
             message: "你的任务已经在跑啦，等等吧",
+        });
+        return;
+    }
+    if (jobId === BusinessCode.StatusJobNoNeedToCreate) {
+        res.status(412).send({
+            status: BusinessCode.StatusJobAlreadyExisted,
+            message: "你的任务无需被创建，可能是因为没有需要 sync 的歌曲",
         });
         return;
     }

@@ -43,6 +43,15 @@ export const createSyncSongFromPlaylistJob = (playlistId) => {
         }
     });
 };
+export const createSyncThePlaylistToLocalServiceJob = (playlistId) => {
+    return post("/sync-jobs", {
+        "jobType": "SyncThePlaylistToLocalService",
+        "playlist": {
+            "id": playlistId,
+            "source": "netease"
+        }
+    });
+};
 export const createSyncSongWithSongIdJob = (songId) => {
     return post("/sync-jobs", {
         "jobType": "UnblockedSong",

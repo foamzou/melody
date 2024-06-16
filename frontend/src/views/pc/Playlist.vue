@@ -65,6 +65,19 @@
                 <span style="font-size: 10px"> (实验性功能) </span>
               </el-link>
             </el-col>
+            <el-col :span="6" style="height: 32px; line-height: 32px">
+              <el-link
+                type="primary"
+                :underline="false"
+                @click="syncThePlaylistToLocalService(playlistDetail.id)"
+              >
+                <i
+                  class="bi bi-download"
+                  style="font-size: 18px; padding-right: 3px"
+                ></i>
+                <span style="font-size: 15px"> 同步到服务器本地 </span>
+              </el-link>
+            </el-col>
             <el-col :span="7">
               <el-switch
                 style="float: left"
@@ -205,6 +218,7 @@ import {
   getPlaylistDetail,
   createSyncSongFromPlaylistJob,
   createSyncSongWithSongIdJob,
+  createSyncThePlaylistToLocalServiceJob,
 } from "../../api";
 import { secondDurationToDisplayDuration, sourceCodeToName } from "../../utils";
 import SearchResultTable from "../../components/SearchResultTable.vue";
@@ -294,6 +308,14 @@ export default {
           startTaskListener(ret.data.jobId);
         }
       });
+    },
+    async syncThePlaylistToLocalService(playlistId) {
+      const ret = await createSyncThePlaylistToLocalServiceJob(playlistId);
+      console.log(ret);
+
+      if (ret.data && ret.data.jobId) {
+        startTaskListener(ret.data.jobId);
+      }
     },
     async unblockTheSong(songId) {
       const ret = await createSyncSongWithSongIdJob(songId);

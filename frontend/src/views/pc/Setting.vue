@@ -79,7 +79,7 @@
             <el-col :span="15">
               <el-input
                 v-model="filenameFormat"
-                placeholder="留空则默认为：{album}-{artist}-{songName}"
+                placeholder="留空则默认为：{songName}-{artist}"
               />
             </el-col>
           </el-row>
@@ -90,7 +90,7 @@
       <el-row justify="center">
         <el-col :span="16">
           <h3>歌单同步到本地</h3>
-          <el-row>
+          <!-- <el-row>
             <el-col :span="5">
               <span>自动同步</span
               ><el-tooltip placement="top">
@@ -100,7 +100,7 @@
                 <template #content>
                   <p>
                     1. 开启自动同步后， Melody
-                    会自动将你的歌单里的所有歌曲下载到本地磁盘
+                    会按照指定频率自动将你的歌单里的所有歌曲下载到本地磁盘
                   </p>
                   <p>
                     2.
@@ -135,7 +135,7 @@
             <el-checkbox v-model="playlistSyncToLocal.deleteLocalFile">
               当歌单里的歌曲移除时，同时删除本地对应的歌曲文件
             </el-checkbox>
-          </div>
+          </div> -->
           <el-row>
             <el-col :span="5">
               <span>歌单歌曲的文件名格式</span>
@@ -162,7 +162,7 @@
             <el-col :span="15">
               <el-input
                 v-model="playlistSyncToLocal.filenameFormat"
-                placeholder="留空则默认为：{playlistName}/{album}-{artist}-{songName}"
+                placeholder="留空则默认为：{playlistName}/{songName}-{artist}"
               />
             </el-col>
           </el-row>

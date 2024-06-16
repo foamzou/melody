@@ -5,6 +5,7 @@ const path = require('path');
 const cmd = require('../../utils/cmd');
 const fs = require('fs');
 const configManager = require('../config_manager')
+const downloadFile = require('../../utils/download');
 
 const { getBinPath } = require('./media_get');
 
@@ -14,6 +15,29 @@ if (!fs.existsSync(basePath)) {
     fs.mkdirSync(basePath);
 }
 logger.info(`[tmp path] use ${basePath}`)
+
+
+async function downloadViaSourceUrl(url) {
+    logger.info(`downloadViaSourceUrl params: url: ${url}`);
+
+    const requestHash = md5(url);
+    const downloadPath = `${basePath}/${requestHash}.mp3`;
+    logger.info(`start download from ${url}`);
+
+
+    const isSucceed = await downloadFile(url, downloadPath);
+    if (!isSucceed) {
+        logger.error(`download failed with ${url}`);
+        return false;
+    }
+
+    if (!fs.existsSync(downloadPath)) {
+        logger.error(`download failed with ${url}, the file not exists ${downloadPath}`);
+        return false;
+    }
+    logger.info(`download success, path: ${downloadPath}`);
+    return downloadPath;
+}
 
 async function fetchWithUrl(url, {
     songName = "",
@@ -143,6 +167,7 @@ async function searchSongFromAllPlatform({
 }
 
 module.exports = {
+    downloadViaSourceUrl: downloadViaSourceUrl,
     fetchWithUrl: fetchWithUrl,
     getMetaWithUrl: getMetaWithUrl,
     searchSongFromAllPlatform: searchSongFromAllPlatform,

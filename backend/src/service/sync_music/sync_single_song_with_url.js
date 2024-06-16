@@ -10,13 +10,14 @@ const configManager = require('../config_manager');
 const fs = require('fs');
 const libPath = require('path');
 const utilFs = require('../../utils/fs');
+const { downloadFromLocalTmpPath } = require('./download_to_local');
 
 module.exports = async function syncSingleSongWithUrl(uid, url, {
     songName = "",
     artist = "",
     album = "",
     songFromWyCloud = null
-} = {}, jobId = 0, jobType = JobType.SyncSongFromUrl) {
+} = {}, jobId = 0, jobType = JobType.SyncSongFromUrl, playlistName = "", collectRet) {
     // step 1. fetch song info
     const songInfo = await getMetaWithUrl(url);
     logger.info(songInfo);
@@ -64,34 +65,8 @@ module.exports = async function syncSingleSongWithUrl(uid, url, {
     let uploadResult;
 
 
-    if (jobType === JobType.DownloadSongFromUrl) {
-        const downloadPath = (await configManager.getGlobalConfig()).downloadPath;
-        if (!downloadPath) {
-            logger.error(`download path not set`);
-            return "IOFailed";
-        }
-        let filename = (await configManager.getGlobalConfig()).filenameFormat
-            .replace('{artist}', songInfo.artist ? songInfo.artist : 'Unknown')
-            .replace('{songName}', songInfo.songName ? songInfo.songName : 'Unknown')
-            .replace('{album}', songInfo.album ? songInfo.album : 'Unknown');
-        // remove the head / and \ in filename
-        filename = filename.replace(/^[\/\\]+/, '');
-        const destPathAndFilename = `${downloadPath}${libPath.sep}${filename}.mp3`;
-        const destPath = libPath.dirname(destPathAndFilename);
-        // make sure the path is exist
-        await utilFs.asyncMkdir(destPath, {recursive: true});
-        try {
-            if (await utilFs.asyncFileExisted(destPathAndFilename)) {
-                logger.info(`file already exists, remove it: ${destPathAndFilename}`);
-                await utilFs.asyncUnlinkFile(destPathAndFilename)
-            }
-            await utilFs.asyncMoveFile(path, destPathAndFilename);
-        } catch (err) {
-            logger.error(`move file failed, ${path} -> ${destPathAndFilename}`, err);
-            return "IOFailed";
-        }
-        logger.info(`download song success, path: ${destPathAndFilename}`);
-        return true;
+    if (jobType === JobType.DownloadSongFromUrl || jobType === JobType.SyncThePlaylistToLocalService) {
+        return await downloadFromLocalTmpPath(path, songInfo, playlistName, collectRet);
     } else {
         const startTime = new Date();
         for (let tryCount = 0; tryCount < 5; tryCount++) {

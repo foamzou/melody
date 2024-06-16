@@ -115,9 +115,10 @@ async function getSongInfo(uid, id) {
     };
 }
 
-async function getPlayUrl(uid, id) {
+async function getPlayUrl(uid, id, isLossless = false) {
     const response = await safeRequest(uid, song_url, {
         id,
+        br: isLossless ? 999000 : 320000
     });
     if (response === false) {
         return '';
@@ -224,6 +225,7 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
             songId: songInfo.id,
             songName: songInfo.name,
             artists: songInfo.ar.map(artist => artist.name),
+            artist: songInfo.ar.length > 0 ? songInfo.ar[0].name : '',
             duration: songInfo.dt / 1000,
             album: songInfo.al.name,
             cover: songInfo.al.picUrl,
