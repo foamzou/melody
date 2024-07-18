@@ -74,7 +74,7 @@ export default defineConfig(({command, mode}) => {
             name: "vant",
             var: "vant",
             path: 'https://cdnjs.cloudflare.com/ajax/libs/vant/3.4.8/vant.js',
-            css: ["https://cdnjs.cloudflare.com/ajax/libs/vant/3.4.8/index.min.csss"],
+            css: ["https://cdnjs.cloudflare.com/ajax/libs/vant/3.4.8/index.min.css"],
         }
         ]
       }),
