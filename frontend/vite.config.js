@@ -42,39 +42,39 @@ export default defineConfig(({command, mode}) => {
           {
               name: "vue",
               var: "Vue",
-              path: "https://cdn.staticfile.org/vue/3.2.33/vue.global.js",
+              path: "https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.33/vue.global.min.js",
           },
           {
               name: "vue-router",
               var: "VueRouter",
-              path: "https://cdn.staticfile.org/vue-router/4.0.14/vue-router.global.js",
+              path: "https://cdnjs.cloudflare.com/ajax/libs/vue-router/4.0.14/vue-router.global.min.js",
           },
           {
               name: "vuex",
               var: "Vuex",
-              path: 'https://cdn.staticfile.org/vuex/4.0.2/vuex.global.js',
+              path: 'https://cdnjs.cloudflare.com/ajax/libs/vuex/4.0.2/vuex.global.min.js',
           },
           {
               name: "axios",
               var: "axios",
-              path: 'https://cdn.staticfile.org/axios/0.26.1/axios.js',
+              path: 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.26.1/axios.min.js',
           },
           {
               name: "element-plus",
               var: "ElementPlus",
-              path: 'https://cdn.staticfile.org/element-plus/2.1.9/index.full.js',
-              css: ["https://cdn.staticfile.org/element-plus/2.1.9/theme-chalk/index.css"],
+              path: 'https://cdnjs.cloudflare.com/ajax/libs/element-plus/2.1.9/index.full.js',
+              css: ["https://cdnjs.cloudflare.com/ajax/libs/element-plus/2.1.9/theme-chalk/index.min.css"],
           },
           {
               name: "element-plus/lib/locale/lang/zh-cn",
               var: "ElementPlusLocaleZhCn",
-              path: 'https://cdn.staticfile.org/element-plus/2.1.9/locale/zh-cn.js',
+              path: 'https://cdnjs.cloudflare.com/ajax/libs/element-plus/2.1.9/locale/zh-cn.min.js',
           },
           {
             name: "vant",
             var: "vant",
-            path: 'https://cdn.bootcdn.net/ajax/libs/vant/3.4.8/vant.js',
-            css: ["https://cdn.bootcdn.net/ajax/libs/vant/3.4.8/index.css"],
+            path: 'https://cdnjs.cloudflare.com/ajax/libs/vant/3.4.8/vant.js',
+            css: ["https://cdnjs.cloudflare.com/ajax/libs/vant/3.4.8/index.min.css"],
         }
         ]
       }),
