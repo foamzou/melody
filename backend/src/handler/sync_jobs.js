@@ -15,6 +15,7 @@ async function createJob(req, res) {
     const request = req.body;
 
     const jobType = request.jobType;
+    const options = request.options;
     let jobId = 0;
 
     if (jobType === JobType.UnblockedPlaylist || jobType === JobType.SyncThePlaylistToLocalService) {
@@ -22,14 +23,17 @@ async function createJob(req, res) {
         const playlistId = request.playlist && request.playlist.id;
 
         if (source !== Source.Netease.code || !playlistId) {
-            res.status(429).send({
+            res.status(412).send({ 
                 status: 1,
                 message: "source or id is invalid",
             });
             return;
         }
         if (jobType === JobType.UnblockedPlaylist) {
-            jobId = await unblockMusicInPlaylist(uid, source, playlistId)
+            jobId = await unblockMusicInPlaylist(uid, source, playlistId, {
+                syncWySong: options.syncWySong,
+                syncNotWySong: options.syncNotWySong,
+            });
         } else {
             jobId = await syncPlaylist(uid, source, playlistId)
         }
@@ -38,7 +42,7 @@ async function createJob(req, res) {
         const songId = request.songId;
 
         if (source !== Source.Netease.code || !songId) {
-            res.status(429).send({
+            res.status(412).send({
                 status: 1,
                 message: "source or id is invalid",
             });
@@ -50,7 +54,7 @@ async function createJob(req, res) {
         const url = request.urlJob && matchUrlFromStr(request.urlJob.url);
 
         if (!url) {
-            res.status(429).send({
+            res.status(412).send({
                 status: 1,
                 message: "url is invalid",
             });
@@ -77,7 +81,7 @@ async function createJob(req, res) {
             });
             if (!songFromWyCloud) {
                 logger.error(`song not found in wycloud`);
-                res.status(429).send({
+                res.status(412).send({
                     status: 1,
                     message: "can not find song in wycloud with your songId",
                 });
@@ -114,7 +118,7 @@ async function createJob(req, res) {
             })
         }
     } else {
-        res.status(429).send({
+        res.status(412).send({
             status: 1,
             message: "jobType is not supported",
         });
@@ -123,7 +127,7 @@ async function createJob(req, res) {
 
     if (jobId === false) {
         logger.error(`create job failed, uid: ${uid}`);
-        res.status(429).send({
+        res.status(412).send({
             status: 1,
             message: "create job failed",
         });
@@ -131,7 +135,7 @@ async function createJob(req, res) {
     }
 
     if (jobId === BusinessCode.StatusJobAlreadyExisted) {
-        res.status(429).send({
+        res.status(412).send({
             status: BusinessCode.StatusJobAlreadyExisted,
             message: "你的任务已经在跑啦，等等吧",
         });

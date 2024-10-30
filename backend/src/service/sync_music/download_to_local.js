@@ -54,10 +54,10 @@ async function downloadFromLocalTmpPath(tmpPath, songInfo = {
 function buildDestFilename(globalConfig, songInfo, playlistName) {
     const downloadPath = globalConfig.downloadPath;
     let filename = (playlistName ? globalConfig.playlistSyncToLocal?.filenameFormat : globalConfig.filenameFormat)
-        .replace('{artist}', songInfo.artist ? songInfo.artist : 'Unknown')
-        .replace('{songName}', songInfo.songName ? songInfo.songName : 'Unknown')
-        .replace('{playlistName}', playlistName ? playlistName : 'UnknownPlayList')
-        .replace('{album}', songInfo.album ? songInfo.album : 'Unknown');
+        .replace(/{artist}/g, songInfo.artist ? songInfo.artist : 'Unknown')
+        .replace(/{songName}/g, songInfo.songName ? songInfo.songName : 'Unknown')
+        .replace(/{playlistName}/g, playlistName ? playlistName : 'UnknownPlayList')
+        .replace(/{album}/g, songInfo.album ? songInfo.album : 'Unknown');
     // remove the head / and \ in filename
     filename = filename.replace(/^[\/\\]+/, '') + '.mp3';
     return `${downloadPath}${libPath.sep}${filename}`

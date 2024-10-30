@@ -173,6 +173,8 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
         logger.error(`uid(${uid}) playlist(${playlistId}) has no songs.`, detailResponse, songsResponse);
         return false;
     }
+    // console.log(JSON.stringify(songsResponse, null, 4));
+    // ddd
     if (songsResponse.songs.length >= 1000) {
         const songsPage2Response = await safeRequest(uid, playlist_track_all, {
             id: playlistId,
@@ -202,11 +204,16 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
             return false;
         } 
         
+        // 收费歌曲
         if (song.fee === 1) {
+            if (song.realPayed === 1 || song.payed === 1) {
+                return false;
+            }
             return true;
         }
-        // blocked or need to pay: subp == 0 && realpayed !== 1
-        if (song.subp != 0 || song.realPayed === 1) {
+        // subp 或 cp === 1 可能都表示有版权
+        // 免费歌曲
+        if (song.subp === 1) {
             return false;
         }
 
@@ -230,7 +237,7 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
             album: songInfo.al.name,
             cover: songInfo.al.picUrl,
             pageUrl: `https://music.163.com/song?id=${songInfo.id}`,
-            playUrl: !isBlocked && !isCloud ? `http://music.163.com/song/media/outer/url?id=${songInfo.id}.mp3` : '',
+            playUrl: !isBlocked && !isCloud ? `http://music.163.com/song/media/outer/url?id=${songInfo.id}.mp3` : '', // 不再建议使用这个 url，建议每次都 Call API 获取
             isBlocked,
             isCloud,
         });

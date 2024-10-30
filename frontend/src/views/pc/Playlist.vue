@@ -69,6 +69,19 @@
               <el-link
                 type="primary"
                 :underline="false"
+                @click="unblockThePlaylistForWySong(playlistDetail.id)"
+              >
+                <i
+                  class="bi bi-upload"
+                  style="font-size: 18px; padding-right: 3px"
+                ></i>
+                <span style="font-size: 15px"> 备份到网易云云盘 </span>
+              </el-link>
+            </el-col>
+            <el-col :span="6" style="height: 32px; line-height: 32px">
+              <el-link
+                type="primary"
+                :underline="false"
                 @click="syncThePlaylistToLocalService(playlistDetail.id)"
               >
                 <i
@@ -301,13 +314,32 @@ export default {
           type: "info",
           duration: 1000,
         });
-        const ret = await createSyncSongFromPlaylistJob(playlistId);
+        const ret = await createSyncSongFromPlaylistJob(playlistId, {
+          syncWySong: false,
+          syncNotWySong: true,
+        });
         console.log(ret);
 
         if (ret.data && ret.data.jobId) {
           startTaskListener(ret.data.jobId);
         }
       });
+    },
+    async unblockThePlaylistForWySong(playlistId) {
+        ElMessage({
+          message: "开始将歌单中的歌曲备份到网易云云盘",
+          type: "info",
+          duration: 1000,
+        });
+        const ret = await createSyncSongFromPlaylistJob(playlistId, {
+          syncWySong: true,
+          syncNotWySong: false,
+        });
+        console.log(ret);
+
+        if (ret.data && ret.data.jobId) {
+          startTaskListener(ret.data.jobId);
+        }
     },
     async syncThePlaylistToLocalService(playlistId) {
       const ret = await createSyncThePlaylistToLocalServiceJob(playlistId);

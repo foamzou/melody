@@ -1,3 +1,4 @@
+const sound_quality = require('../../consts/sound_quality');
 const asyncFs = require('../../utils/fs');
 
 const DataPath = `${__dirname}/../../../.profile/data`;
@@ -28,6 +29,7 @@ const GlobalDefaultConfig = {
         },
         deleteLocalFile: false,
         filenameFormat: `{playlistName}${libPath.sep}{songName}-{artist}`,
+        soundQualityPreference: sound_quality.High,
     },
 };
 
@@ -58,6 +60,9 @@ async function getGlobalConfig() {
     }
     if (!config.playlistSyncToLocal.filenameFormat) {
         config.playlistSyncToLocal.filenameFormat = GlobalDefaultConfig.playlistSyncToLocal.filenameFormat;
+    }
+    if (!config.playlistSyncToLocal.soundQualityPreference) {
+        config.playlistSyncToLocal.soundQualityPreference = GlobalDefaultConfig.playlistSyncToLocal.soundQualityPreference;
     }
     return config;
 }

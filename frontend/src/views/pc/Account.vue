@@ -155,10 +155,99 @@
               </el-row>
             </el-col>
           </el-row>
-          <el-row v-if="account.loginType !== 'qrcode'">
-            <el-col :span="8" :offset="8" style="margin-top: 20px">
+
+          <!-- 将歌单的歌曲同步到网易云云盘 -->
+          <el-row justify="center">
+            <el-col :span="16">
+              <h3>同步歌单的歌曲到网易云云盘</h3>
+              <el-row>
+                <el-col :span="5">
+                  <span>自动同步</span
+                  ><el-tooltip placement="top">
+                    <span slot="content">
+                      <i class="bi bi-question-circle"></i>
+                    </span>
+                    <template #content>
+                      <p>
+                        1. 开启自动同步后， Melody
+                        会按照指定频率自动将你的歌单里的所有歌曲同步到网易云云盘
+                      </p>
+                      <p>
+                        2.
+                        当频率为小时时，到达设定的时间间隔后，会在整点的时候进行同步
+                      </p>
+                      <p>3. 当频率为天时，会在当天的 0 点进行同步</p>
+                    </template>
+                  </el-tooltip>
+                  <el-switch
+                    v-model="
+                      account.config.playlistSyncToWyCloudDisk.autoSync.enable
+                    "
+                  ></el-switch>
+                </el-col>
+                <el-col :span="10">
+                  <span style="margin-right: 10px">频率： 每</span>
+                  <el-input-number
+                    v-model="
+                      account.config.playlistSyncToWyCloudDisk.autoSync
+                        .frequency
+                    "
+                    :min="1"
+                    :max="30"
+                    :style="{ width: '110px' }"
+                  />
+                  <span style="margin-left: 20px">
+                    <el-radio-group
+                      v-model="
+                        account.config.playlistSyncToWyCloudDisk.autoSync
+                          .frequencyUnit
+                      "
+                    >
+                      <el-radio label="hour">小时</el-radio>
+                      <el-radio label="day">天</el-radio>
+                    </el-radio-group>
+                  </span>
+                </el-col>
+                <el-col :span="7">
+                  <span style="margin-right: 10px">音质偏好：</span>
+                  <span style="margin-left: 20px">
+                    <el-radio-group
+                      v-model="
+                        account.config.playlistSyncToWyCloudDisk
+                          .soundQualityPreference
+                      "
+                    >
+                      <el-radio label="high">高</el-radio>
+                      <el-radio label="lossless">无损</el-radio>
+                    </el-radio-group>
+                  </span>
+                </el-col>
+              </el-row>
+              <div>
+                <el-checkbox
+                  v-model="account.config.playlistSyncToWyCloudDisk.syncWySong"
+                >
+                  上传网易云已有歌曲到云盘(强烈推荐)
+                </el-checkbox>
+                <el-checkbox
+                  v-model="
+                    account.config.playlistSyncToWyCloudDisk.syncNotWySong
+                  "
+                >
+                  解锁灰色歌曲(不推荐做自动同步)
+                </el-checkbox>
+              </div>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col
+              :span="8"
+              :offset="8"
+              style="margin-top: 20px; margin-bottom: 60px"
+            >
               <el-button type="primary" @click="updateAccount">
-                更新网易云账号信息
+                更新配置
               </el-button>
             </el-col>
           </el-row>
@@ -177,7 +266,26 @@ export default {
   data: () => {
     return {
       mk: "",
-      account: {},
+      account: {
+        loginType: "",
+        account: 0,
+        password: "",
+        platform: "wy",
+        uid: "",
+        countryCode: "",
+        config: {
+          playlistSyncToWyCloudDisk: {
+            autoSync: {
+              enable: false,
+              frequency: 1,
+              frequencyUnit: "day",
+            },
+            syncWySong: true,
+            syncNotWySong: false,
+            soundQualityPreference: "high",
+          },
+        },
+      },
       registedMK: false,
       qrLogin: {
         qrCode: "",
@@ -285,12 +393,14 @@ export default {
     },
 
     async updateAccount() {
-      if (
-        !this.account.account ||
-        !this.account.password ||
-        !this.account.loginType
-      ) {
-        return;
+      if (this.account.loginType !== "qrcode") {
+        if (
+          !this.account.account ||
+          !this.account.password ||
+          !this.account.loginType
+        ) {
+          return;
+        }
       }
 
       if (this.account.loginType == "phone") {
@@ -326,6 +436,7 @@ export default {
         countryCode: this.account.countryCode,
         account: this.account.account,
         password: this.account.password,
+        config: this.account.config,
       });
       if (ret.data.account) {
         this.account = ret.data.account;

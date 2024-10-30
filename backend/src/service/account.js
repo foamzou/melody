@@ -4,11 +4,25 @@ let AccountMap = require(AccountPath);
 const logger = require('consola');
 const locker = require('../utils/simple_locker');
 const fs = require('fs');
+const SoundQuality = require('../consts/sound_quality');
 
 module.exports = {
     getAccount: getAccount,
     setAccount: setAccount,
 }
+
+const defaultConfig = {
+    playlistSyncToWyCloudDisk: {
+        autoSync: {
+          enable: false,
+          frequency: 1,
+          frequencyUnit: "day",
+        },
+        syncWySong: true,
+        syncNotWySong: false,
+        soundQualityPreference: SoundQuality.High,
+    },
+};
 
 function getAccount(uid) {
     const account = AccountMap[uid];
@@ -16,11 +30,17 @@ function getAccount(uid) {
         logger.error(`the uid(${uid}) does not existed`);
         return false;
     }
+    if (!account.config) {
+        account.config = defaultConfig;
+    }
+    if (!account.config.playlistSyncToWyCloudDisk) {
+        account.config.playlistSyncToWyCloudDisk = defaultConfig.playlistSyncToWyCloudDisk;
+    }
     account.uid = uid;
     return account;
 }
 
-async function setAccount(uid, loginType, account, password, countryCode = '') {
+async function setAccount(uid, loginType, account, password, countryCode = '', config) {
     const lockKey = 'setAccount';
     await locker.lock(lockKey, 5);
 
@@ -31,14 +51,16 @@ async function setAccount(uid, loginType, account, password, countryCode = '') {
         locker.unlock(lockKey);
         return false;
     }
-    if (userAccount.loginType == loginType && userAccount.account == account && userAccount.password == password && userAccount.countryCode == countryCode) {
-        locker.unlock(lockKey);
-        return true;
-    }
+
     userAccount.loginType = loginType;
     userAccount.account = account;
     userAccount.password = password;
     userAccount.countryCode = countryCode;
+
+    if (config) {
+        userAccount.config = config;
+    }
+
     AccountMap[uid] = userAccount;
 
     storeAccount(AccountMap);

@@ -237,11 +237,8 @@ export default {
       this.playerSongInfo.suggestMatchSongId = suggestMatchSongId;
     },
     async playTheSongWithPlayUrl(playOption) {
-      if (!playOption.playUrl) {
-        const playUrlRet = await getPlayUrl(playOption.songId);
-        if (!playUrlRet.data.playUrl) {
-          return false;
-        }
+      const playUrlRet = await getPlayUrl(playOption.songId);
+      if (playUrlRet.data.playUrl) {
         playOption.playUrl = playUrlRet.data.playUrl;
       }
 

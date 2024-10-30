@@ -301,7 +301,11 @@ export default {
           type: "primary",
           duration: 1000,
         });
-        const ret = await createSyncSongFromPlaylistJob(playlistId);
+        const ret = await createSyncSongFromPlaylistJob(playlistId, {
+          // TODO 先 hard code，后面 mobile 端再做配置
+          syncWySong: false,
+          syncNotWySong: true,
+        });
         console.log(ret);
 
         if (ret.data && ret.data.jobId) {

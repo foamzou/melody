@@ -86,11 +86,11 @@
         </el-col>
       </el-row>
 
-      <!-- 歌单同步配置 -->
+      <!-- 歌单同步到本地配置 -->
       <el-row justify="center">
         <el-col :span="16">
           <h3>歌单同步到本地</h3>
-          <!-- <el-row>
+          <el-row>
             <el-col :span="5">
               <span>自动同步</span
               ><el-tooltip placement="top">
@@ -135,7 +135,7 @@
             <el-checkbox v-model="playlistSyncToLocal.deleteLocalFile">
               当歌单里的歌曲移除时，同时删除本地对应的歌曲文件
             </el-checkbox>
-          </div> -->
+          </div>
           <el-row>
             <el-col :span="5">
               <span>歌单歌曲的文件名格式</span>
@@ -168,7 +168,7 @@
           </el-row>
         </el-col>
       </el-row>
-
+      
       <!-- 勾选搜索站点 -->
       <el-row>
         <el-col :span="24">

@@ -21,6 +21,8 @@ const KV = require("../kv");
 const utilFs = require("../../utils/fs");
 const configManager = require("../config_manager");
 const path = require("path");
+const { consts } = require("../../consts/source");
+const soundQualityConst = require("../../consts/sound_quality");
 
 module.exports = async function syncPlaylist(uid, source, playlistId) {
   // step 1. get all the songs
@@ -122,8 +124,13 @@ async function syncSingleSong(uid, wySongMeta, playlistInfo) {
     const playlistName = playlistInfo.name;
     const playlistID = playlistInfo.id;
   logger.info(`sync single song with meta: ${JSON.stringify(wySongMeta)}`);
+  const globalConfig = await configManager.getGlobalConfig();
+  let isLossless = false;
+  if (globalConfig.playlistSyncToLocal.soundQualityPreference === soundQualityConst.Lossless) {
+    isLossless = true;
+  }
   // 优先使用官方资源下载
-  const playUrl = await getPlayUrl(uid, wySongMeta.songId);
+  const playUrl = await getPlayUrl(uid, wySongMeta.songId, isLossless);
   if (playUrl) {
     const tmpPath = await downloadViaSourceUrl(playUrl);
     if (tmpPath) {

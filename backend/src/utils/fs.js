@@ -98,6 +98,19 @@ async function asyncMd5(filePath) {
     });
 }
 
+async function asyncAppendFile(filePath, str) {
+    return new Promise((resolve, reject) => {
+        fs.appendFile(filePath, str, (err) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve();
+        });
+    });
+}
+
+
 module.exports = {
     asyncReadFile,
     asyncWriteFile,
@@ -107,4 +120,5 @@ module.exports = {
     asyncMoveFile,
     asyncReadDir,
     asyncMd5,
+    asyncAppendFile,
 };

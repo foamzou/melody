@@ -34,13 +34,14 @@ export const createDownloadSongFromUrlJob = (url, songId = "") => {
         }
     });
 };
-export const createSyncSongFromPlaylistJob = (playlistId) => {
+export const createSyncSongFromPlaylistJob = (playlistId, options) => {
     return post("/sync-jobs", {
         "jobType": "UnblockedPlaylist",
         "playlist": {
             "id": playlistId,
             "source": "netease"
-        }
+        },
+        "options": options
     });
 };
 export const createSyncThePlaylistToLocalServiceJob = (playlistId) => {

@@ -16,16 +16,9 @@ async function set(req, res) {
     const accountName = req.body.account;
     const password = req.body.password;
     const countryCode = req.body.countryCode;
-    if (!accountName || !password) {
-        res.status(422).send({
-            status: 1,
-            message: 'account or password is empty',
-            data: {}
-        });
-        return;
-    }
+    const config = req.body.config;
 
-    const ret = await AccountService.setAccount(req.account.uid, loginType, accountName, password, countryCode);
+    const ret = await AccountService.setAccount(req.account.uid, loginType, accountName, password, countryCode, config);
     res.send({
         status: ret ? 0 : 1,
         data: {
@@ -74,7 +67,7 @@ async function qrLoginCheck(req, res) {
         req.account.account = account.wyAccount.userId;
         storeCookie(req.account.uid, req.account, loginCheckRet.cookie);
 
-        AccountService.setAccount(req.account.uid, 'qrcode', account.wyAccount.userId, '');
+        AccountService.setAccount(req.account.uid, 'qrcode', account.wyAccount.userId, '', null);
         account = await getWyAccountInfo(req.account.uid);
     }
     res.send({
