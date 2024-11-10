@@ -1,201 +1,249 @@
 <template>
-  <el-container>
+  <el-container class="setting-container">
     <el-main>
       <!-- 组件更新 -->
-      <el-row>
-        <el-col :span="24">
-          <h3>核心组件版本更新</h3>
-          当前使用的 media-get 版本号:
-          {{ mediaGetVersion }}. 最新的版本号:
-          {{ latestVersion }}
-          <el-button
-            type="primary"
-            :disabled="updating"
-            @click="updateMediaGet"
-          >
-            <template v-if="!updating">更新 media-get</template>
-            <template v-else>更新中</template>
-          </el-button>
-        </el-col>
-      </el-row>
+      <el-card class="setting-card">
+        <template #header>
+          <div class="card-header">
+            <span>核心组件版本更新</span>
+          </div>
+        </template>
+        <el-row align="middle" class="version-info">
+          <el-col :span="16">
+            <span class="label">当前使用的 media-get 版本号:</span>
+            <span class="version">{{ mediaGetVersion }}</span>
+            <span class="label">最新的版本号:</span>
+            <span class="version">{{ latestVersion }}</span>
+          </el-col>
+          <el-col :span="8" style="text-align: right">
+            <el-button 
+              type="primary" 
+              :disabled="updating"
+              @click="updateMediaGet"
+              class="update-btn"
+            >
+              <template v-if="!updating">更新 media-get</template>
+              <template v-else>更新中</template>
+            </el-button>
+          </el-col>
+        </el-row>
+      </el-card>
 
-      <!-- 本地下载路径配置 -->
-      <el-row justify="center">
-        <el-col :span="16">
-          <h3>本地下载配置</h3>
-          <div></div>
-          <div></div>
-          <el-row>
-            <el-col :span="5">
-              <span>下载路径</span>
-              <el-tooltip placement="top">
-                <span slot="content">
-                  <i class="bi bi-question-circle"></i>
-                </span>
-                <template #content>
-                  <p>
-                    1. 下载路径格式。Mac/Linux: /path/to/... | Windows:
-                    C:\Users\YourUserName\Downloads.
-                  </p>
-                  <p>
-                    2. 请注意，如果本服务部署在 Docker 中，下载路径应当为 Docker
-                    容器内的路径。你需要将容器内的下载路径映射到宿主机的相应目录，这样下载的文件才能在宿主机上被访问。
-                  </p>
+      <!-- 本地下载配置 -->
+      <el-card class="setting-card">
+        <template #header>
+          <div class="card-header">
+            <span>本地下载配置</span>
+          </div>
+        </template>
+        
+        <el-form label-position="right" label-width="180px">
+          <el-form-item label="下载路径">
+            <el-col :span="16">
+              <el-input v-model="downloadPath" placeholder="下载路径">
+                <template #append>
+                  <el-tooltip placement="top">
+                    <template #content>
+                      <p>1. 下载路径格式。Mac/Linux: /path/to/... | Windows: C:\Users\YourUserName\Downloads</p>
+                      <p>2. 请注意，如果本服务部署在 Docker 中，下载路径应当为 Docker 容器内的路径。你需要将容器内的下载路径映射到宿主机的相应目录。</p>
+                    </template>
+                    <i class="bi bi-question-circle"></i>
+                  </el-tooltip>
                 </template>
-              </el-tooltip>
+              </el-input>
             </el-col>
-            <el-col :span="15">
-              <el-input v-model="downloadPath" placeholder="下载路径" />
-            </el-col>
-          </el-row>
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="5">
-              <span>单曲下载的文件名格式</span>
-              <el-tooltip placement="top">
-                <span slot="content">
-                  <i class="bi bi-question-circle"></i>
-                </span>
-                <template #content>
-                  <p>
-                    1. 文件名格式支持的变量: {songName}, {artist}, {album}
-                    (注意：当无法获取到对应的信息时，会用 Unknown 填充)。
-                  </p>
-                  <p>2. 不需要加文件扩展名</p>
-                  <p>
-                    3. 例如，当你设置为 {album}-{artist}-{songName}
-                    时，文件将会被下载到
-                    /你的下载路径/十一月的肖邦-周杰伦-一路向北.mp3
-                  </p>
-                  <p>
-                    4. 甚至你可以包含 /(unix*) 或
-                    \(win)来将文件存储在不同目录，例如当你设置为
-                    {artist}/{album}/{songName} 时，文件将会被下载到
-                    /你的下载路径/周杰伦/十一月的肖邦/一路向北.mp3
-                  </p>
-                </template>
-              </el-tooltip>
-            </el-col>
-            <el-col :span="15">
+          <el-form-item label="单曲下载的文件名格式">
+            <el-col :span="16">
               <el-input
                 v-model="filenameFormat"
                 placeholder="留空则默认为：{songName}-{artist}"
-              />
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
-
-      <!-- 歌单同步到本地配置 -->
-      <el-row justify="center">
-        <el-col :span="16">
-          <h3>歌单同步到本地</h3>
-          <el-row>
-            <el-col :span="5">
-              <span>自动同步</span
-              ><el-tooltip placement="top">
-                <span slot="content">
-                  <i class="bi bi-question-circle"></i>
-                </span>
-                <template #content>
-                  <p>
-                    1. 开启自动同步后， Melody
-                    会按照指定频率自动将你的歌单里的所有歌曲下载到本地磁盘
-                  </p>
-                  <p>
-                    2.
-                    当频率为小时时，到达设定的时间间隔后，会在整点的时候进行同步
-                  </p>
-                  <p>3. 当频率为天时，会在当天的 0 点进行同步</p>
+              >
+                <template #append>
+                  <el-tooltip placement="top">
+                    <template #content>
+                      <p>支持的变量: {songName}, {artist}, {album}</p>
+                      <p>示例: {album}-{artist}-{songName}</p>
+                      <p>支持目录结构: {artist}/{album}/{songName}</p>
+                    </template>
+                    <i class="bi bi-question-circle"></i>
+                  </el-tooltip>
                 </template>
-              </el-tooltip>
-              <el-switch
-                v-model="playlistSyncToLocal.autoSync.enable"
-              ></el-switch>
+              </el-input>
             </el-col>
-            <el-col :span="10">
-              <span style="margin-right: 10px">频率： 每</span>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- 歌单同步配置 -->
+      <el-card class="setting-card">
+        <template #header>
+          <div class="card-header">
+            <span>歌单同步到本地</span>
+          </div>
+        </template>
+
+        <el-form label-position="right" label-width="180px">
+          <el-form-item label="自动同步">
+            <el-col :span="4">
+              <el-switch v-model="playlistSyncToLocal.autoSync.enable"></el-switch>
+            </el-col>
+            <el-col :span="20" v-if="playlistSyncToLocal.autoSync.enable">
+              <span>每</span>
               <el-input-number
                 v-model="playlistSyncToLocal.autoSync.frequency"
                 :min="1"
                 :max="30"
-                :style="{ width: '110px' }"
+                controls-position="right"
+                style="width: 120px; margin: 0 10px"
               />
-              <span style="margin-left: 20px">
-                <el-radio-group
-                  v-model="playlistSyncToLocal.autoSync.frequencyUnit"
-                >
-                  <el-radio label="hour">小时</el-radio>
-                  <el-radio label="day">天</el-radio>
-                </el-radio-group>
-              </span>
+              <el-radio-group v-model="playlistSyncToLocal.autoSync.frequencyUnit">
+                <el-radio-button label="hour">小时</el-radio-button>
+                <el-radio-button label="day">天</el-radio-button>
+              </el-radio-group>
             </el-col>
-          </el-row>
-          <div>
+          </el-form-item>
+
+          <el-form-item>
             <el-checkbox v-model="playlistSyncToLocal.deleteLocalFile">
               当歌单里的歌曲移除时，同时删除本地对应的歌曲文件
             </el-checkbox>
-          </div>
-          <el-row>
-            <el-col :span="5">
-              <span>歌单歌曲的文件名格式</span>
-              <el-tooltip placement="top">
-                <span slot="content">
-                  <i class="bi bi-question-circle"></i>
-                </span>
-                <template #content>
-                  <p>
-                    1. 文件名格式支持的变量: {playlistName}, {songName},
-                    {artist}, {album} (注意：当无法获取到对应的信息时，会用
-                    Unknown 填充)。
-                  </p>
-                  <p>2. 不需要加文件扩展名</p>
-                  <p>
-                    3. 例如，当你设置为
-                    {playlistName}/{album}-{artist}-{songName}
-                    时，文件将会被下载到
-                    /你的下载路径/开车歌单/十一月的肖邦-周杰伦-一路向北.mp3
-                  </p>
-                </template>
-              </el-tooltip>
-            </el-col>
-            <el-col :span="15">
+          </el-form-item>
+
+          <el-form-item label="歌单歌曲的文件名格式">
+            <el-col :span="16">
               <el-input
                 v-model="playlistSyncToLocal.filenameFormat"
                 placeholder="留空则默认为：{playlistName}/{songName}-{artist}"
-              />
+              >
+                <template #append>
+                  <el-tooltip placement="top">
+                    <template #content>
+                      <p>支持的变量: {playlistName}, {songName}, {artist}, {album}</p>
+                      <p>示例: {playlistName}/{album}-{artist}-{songName}</p>
+                    </template>
+                    <i class="bi bi-question-circle"></i>
+                  </el-tooltip>
+                </template>
+              </el-input>
             </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
-      
-      <!-- 勾选搜索站点 -->
-      <el-row>
-        <el-col :span="24">
-          <h3>搜索站点配置</h3>
-          <div>
-            搜索耗时取决于最慢的网站，请尽量勾选你的服务所在网络能够访问的网站
-          </div>
-          <el-checkbox-group v-model="checkedSources">
-            <el-checkbox
-              v-for="s in supportedSources"
-              :label="s.code"
-              :key="s.code"
-            >
-              {{ s.label }}
-            </el-checkbox>
-          </el-checkbox-group>
-        </el-col>
-      </el-row>
+          </el-form-item>
 
-      <el-row style="margin: 100px">
-        <el-col :span="24">
-          <el-button type="primary" @click="updateConfig"> 更新配置 </el-button>
-        </el-col>
-      </el-row>
+          <!-- 添加音质选择配置 -->
+          <el-form-item label="音质偏好">
+            <el-radio-group
+              v-model="playlistSyncToLocal.soundQualityPreference"
+            >
+              <el-radio-button label="high">高质量</el-radio-button>
+              <el-radio-button label="lossless">无损</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- 搜索站点配置 -->
+      <el-card class="setting-card">
+        <template #header>
+          <div class="card-header">
+            <span>搜索站点配置</span>
+          </div>
+        </template>
+        
+        <div class="source-tip">搜索耗时取决于最慢的网站，请尽量勾选你的服务所在网络能够访问的网站</div>
+        <el-checkbox-group v-model="checkedSources" class="source-list">
+          <el-checkbox
+            v-for="s in supportedSources"
+            :key="s.code"
+            :label="s.code"
+          >
+            {{ s.label }}
+          </el-checkbox>
+        </el-checkbox-group>
+      </el-card>
+
+      <div class="submit-container">
+        <el-button type="primary" @click="updateConfig" size="large">
+          保存设置
+        </el-button>
+      </div>
     </el-main>
   </el-container>
 </template>
+
+<style scoped>
+.setting-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.setting-card {
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+
+.setting-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.version-info {
+  line-height: 32px;
+}
+
+.version-info .label {
+  color: #606266;
+  margin-right: 8px;
+}
+
+.version-info .version {
+  font-weight: 500;
+  margin-right: 20px;
+}
+
+.update-btn {
+  min-width: 120px;
+}
+
+.source-tip {
+  color: #909399;
+  margin-bottom: 15px;
+}
+
+.source-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.submit-container {
+  text-align: center;
+  margin: 40px 0;
+  padding: 20px 0;
+  border-top: 1px solid #ebeef5;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+:deep(.el-input-group__append) {
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+:deep(.el-card__header) {
+  border-bottom: 2px solid #f0f2f5;
+  padding: 15px 20px;
+}
+</style>
 
 <script>
 import {
@@ -224,6 +272,7 @@ export default {
         },
         deleteLocalFile: false,
         filenameFormat: "",
+        soundQualityPreference: "high",
       },
     };
   },

@@ -214,13 +214,38 @@
 .scrollbar-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 50px;
-  margin: 10px;
-  text-align: center;
-  border-radius: 4px;
+  height: 60px;
+  margin: 8px 12px;
+  padding: 0 15px;
+  border-radius: 8px;
   background: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.scrollbar-item:hover {
+  transform: translateX(5px);
+  background: var(--el-color-primary-light-8);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.scrollbar-item .el-link {
+  width: 100%;
+}
+
+.scrollbar-item .el-row {
+  width: 100%;
+}
+
+.scrollbar-item .el-image {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.scrollbar-item .el-col {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
 
@@ -300,7 +325,7 @@ export default {
   methods: {
     async unblockThePlaylist(playlistId) {
       ElMessageBox.confirm(
-        "【智能解锁全部】是一个实验性功能，会根据歌曲名和歌手尝试寻找最合适的来源，但也可能会有货不对版的情况，请谨慎使用。你也可以点击下边单首歌曲的搜索图标进入搜索页面，进行手动解锁",
+        "【智能解锁全部】是一个实验性功能，会根据歌曲名��歌手尝试寻找最合适的来源，但也可能会有货不对版的情况，请谨慎使用。你也可以点击下边单首歌曲的搜索图标进入搜索页面，进行手动解锁",
         "Warning",
         {
           confirmButtonText: "解锁全部",

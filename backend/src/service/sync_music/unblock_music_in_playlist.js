@@ -14,7 +14,7 @@ const asyncFS = require('../../utils/fs');
 
 // scope:
 // 1. for not wy song: download from network then upload to cloud disk
-// 2. for wy song: download from wy then upload to cloud disk
+// 2. for wy song: download from wy then upload to cloud disk. (i.e. backup wy song to cloud disk)
 module.exports = async function unblockMusicInPlaylist(uid, source, playlistId, options = {
     syncWySong: false,
     syncNotWySong: false,
