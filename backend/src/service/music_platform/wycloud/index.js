@@ -283,6 +283,11 @@ async function qrLoginCheck(uid, qrKey) {
     };
 }
 
+async function verifyAccountStatus(uid) {
+    const account = await getMyAccount(uid);
+    return account !== false;
+}
+
 async function safeRequest(uid, moduleFunc, params, cookieRequired = true) {
     try {
         const response = await requestApi(uid, moduleFunc, params, cookieRequired);
@@ -309,4 +314,5 @@ module.exports = {
     getPlayUrl: getPlayUrl,
     qrLoginCreate: qrLoginCreate,
     qrLoginCheck: qrLoginCheck,
+    verifyAccountStatus: verifyAccountStatus,
 }

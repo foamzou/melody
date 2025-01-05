@@ -9,7 +9,7 @@ const libPath = require('path');
 
 async function init() {
     if (!await asyncFs.asyncFileExisted(ConfigPath)) {
-        await asyncFs.asyncMkdir(ConfigPath);
+        await asyncFs.asyncMkdir(ConfigPath, { recursive: true });
     }
 }
 init();
@@ -30,11 +30,19 @@ const GlobalDefaultConfig = {
         deleteLocalFile: false,
         filenameFormat: `{playlistName}${libPath.sep}{songName}-{artist}`,
         soundQualityPreference: sound_quality.High,
+        syncAccounts: [],
     },
 };
 
 async function setGlobalConfig(config) {
+    const oldConfig = await getGlobalConfig();
     await asyncFs.asyncWriteFile(GlobalConfig, JSON.stringify(config));
+
+    // 只在本地同步配置发生变化时更新调度器
+    if (JSON.stringify(oldConfig.playlistSyncToLocal) !== JSON.stringify(config.playlistSyncToLocal)) {
+        const schedulerService = require('../scheduler');
+        await schedulerService.updateLocalSyncJob();
+    }
 }
 
 async function getGlobalConfig() {
@@ -63,6 +71,9 @@ async function getGlobalConfig() {
     }
     if (!config.playlistSyncToLocal.soundQualityPreference) {
         config.playlistSyncToLocal.soundQualityPreference = GlobalDefaultConfig.playlistSyncToLocal.soundQualityPreference;
+    }
+    if (!config.playlistSyncToLocal.syncAccounts) {
+        config.playlistSyncToLocal.syncAccounts = GlobalDefaultConfig.playlistSyncToLocal.syncAccounts;
     }
     return config;
 }

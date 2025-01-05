@@ -72,3 +72,7 @@ export const getGlobalConfig = _ => get("/config/global", {});
 export const setGlobalConfig = (config) => {
     return post("/config/global", config);
 };
+
+export const getAllAccounts = _ => get("/accounts", {});
+
+export const getNextRunInfo = () => get("/scheduler/next-run", {});

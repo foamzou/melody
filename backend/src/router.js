@@ -7,7 +7,7 @@ const Playlists = require('./handler/playlists');
 const Account = require('./handler/account');
 const MediaFetcherLib = require('./handler/media_fetcher_lib');
 const Config = require('./handler/config');
-
+const Scheduler = require('./handler/scheduler');
 const asyncWrapper = (cb) => {
     return (req, res, next) => cb(req, res, next).catch(next);
   };
@@ -26,6 +26,7 @@ router.get('/api/playlists/:source/:id/songs', asyncWrapper(Playlists.listSongsF
 
 router.get('/api/account', asyncWrapper(Account.get));
 router.post('/api/account', asyncWrapper(Account.set));
+router.get('/api/accounts', asyncWrapper(Account.getAllAccounts));
 router.get('/api/account/qrlogin-create', asyncWrapper(Account.qrLoginCreate));
 router.get('/api/account/qrlogin-check', asyncWrapper(Account.qrLoginCheck));
 
@@ -34,5 +35,7 @@ router.post('/api/media-fetcher-lib/update', asyncWrapper(MediaFetcherLib.downlo
 
 router.get('/api/config/global', asyncWrapper(Config.getGlobalConfig));
 router.post('/api/config/global', asyncWrapper(Config.setGlobalConfig));
+
+router.get('/api/scheduler/next-run', asyncWrapper(Scheduler.getNextRun));
 
 module.exports = router;

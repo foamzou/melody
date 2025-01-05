@@ -33,6 +33,7 @@ async function createJob(req, res) {
             jobId = await unblockMusicInPlaylist(uid, source, playlistId, {
                 syncWySong: options.syncWySong,
                 syncNotWySong: options.syncNotWySong,
+                asyncExecute: true,
             });
         } else {
             jobId = await syncPlaylist(uid, source, playlistId)

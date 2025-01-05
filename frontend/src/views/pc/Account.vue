@@ -11,8 +11,8 @@
             </div>
             <el-row class="input-row">
               <el-col :span="16" :offset="4">
-                <el-input 
-                  v-model="mk" 
+                <el-input
+                  v-model="mk"
                   placeholder="32位长度的字符串"
                   size="large"
                   :prefix-icon="Key"
@@ -42,14 +42,14 @@
                 <span>你的 Melody Key: </span>
                 <code>{{ account.uid }}</code>
               </div>
-              <el-button 
-                type="danger" 
-                plain 
-                size="small" 
+              <el-button
+                type="danger"
+                plain
+                size="small"
                 @click="logoutMK"
                 class="logout-btn"
               >
-                退出账号
+                退出 Melody 账号
               </el-button>
             </div>
           </el-card>
@@ -61,7 +61,7 @@
                 <span>网易云账号信息</span>
               </div>
             </template>
-            
+
             <div class="wy-account-info">
               <div class="avatar-section">
                 <el-image
@@ -77,7 +77,9 @@
                 </el-image>
                 <div class="account-status">
                   <template v-if="account.wyAccount">
-                    <span class="nickname">{{ account.wyAccount.nickname }}</span>
+                    <span class="nickname">{{
+                      account.wyAccount.nickname
+                    }}</span>
                     <el-tag size="small" type="success">已绑定</el-tag>
                   </template>
                   <template v-else>
@@ -95,16 +97,24 @@
                 </el-radio-group>
 
                 <!-- 登录表单 -->
-                <div class="login-form" v-if="['phone', 'email'].includes(account.loginType)">
+                <div
+                  class="login-form"
+                  v-if="['phone', 'email'].includes(account.loginType)"
+                >
                   <el-form label-position="top">
-                    <el-form-item v-if="account.loginType == 'phone'" label="国际电话区号">
+                    <el-form-item
+                      v-if="account.loginType == 'phone'"
+                      label="国际电话区号"
+                    >
                       <el-input
                         v-model="account.countryCode"
                         placeholder="默认86，不需要输入 +"
                         maxlength="4"
                       ></el-input>
                     </el-form-item>
-                    <el-form-item :label="account.loginType == 'phone' ? '手机号' : '邮箱'">
+                    <el-form-item
+                      :label="account.loginType == 'phone' ? '手机号' : '邮箱'"
+                    >
                       <el-input v-model="account.account"></el-input>
                     </el-form-item>
                     <el-form-item label="密码">
@@ -123,7 +133,13 @@
                     <el-image :src="qrLogin.qrCode" class="qr-code">
                       <template #error>
                         <div class="qr-error">
-                          <p>{{ !account.wyAccount ? "二维码已失效，请点击刷新" : "如需切换绑定的账号,点击按钮刷新二维码" }}</p>
+                          <p>
+                            {{
+                              !account.wyAccount
+                                ? "二维码已失效，请点击刷新"
+                                : "如需切换绑定的账号,点击按钮刷新二维码"
+                            }}
+                          </p>
                         </div>
                       </template>
                     </el-image>
@@ -142,6 +158,19 @@
             </div>
           </el-card>
 
+          <!-- 昵称设置 -->
+          <el-card class="info-card name-card" shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <span>昵称</span>
+              </div>
+            </template>
+            <el-input
+              v-model="account.name"
+              placeholder="请输入昵称"
+            ></el-input>
+          </el-card>
+
           <!-- 同步设置卡片 -->
           <el-card class="info-card sync-card" shadow="hover">
             <template #header>
@@ -149,9 +178,15 @@
                 <span>备份歌单的歌曲到网易云云盘</span>
                 <el-tooltip placement="top">
                   <template #content>
-                    <p>1. 开启自动同步后，Melody 会按照指定频率自动将你的歌单里的所有歌曲同步到网易云云盘</p>
-                    <p>2. 当频率为小时时，到达设定的时间间隔后，会在整点的时候进行同步</p>
-                    <p>3. 当频率为天时，会在当天的 0 点进行同步</p>
+                    <p>
+                      1. 开启自动同步后，Melody
+                      会按照指定频率自动将你的歌单里的所有歌曲同步到网易云云盘
+                    </p>
+                    <p>
+                      2.
+                      当频率为小时时，将在整点执行，如每8小时则在0点、8点、16点执行
+                    </p>
+                    <p>3. 当频率为天时，将在每天0点执行</p>
                   </template>
                   <el-icon><QuestionFilled /></el-icon>
                 </el-tooltip>
@@ -162,21 +197,34 @@
               <el-form label-position="left" label-width="120px">
                 <el-form-item label="自动同步">
                   <el-switch
-                    v-model="account.config.playlistSyncToWyCloudDisk.autoSync.enable"
+                    v-model="
+                      account.config.playlistSyncToWyCloudDisk.autoSync.enable
+                    "
                   />
                 </el-form-item>
 
-                <el-form-item label="同步频率" v-if="account.config.playlistSyncToWyCloudDisk.autoSync.enable">
+                <el-form-item
+                  label="同步频率"
+                  v-if="
+                    account.config.playlistSyncToWyCloudDisk.autoSync.enable
+                  "
+                >
                   <div class="frequency-input">
                     <span>每</span>
                     <el-input-number
-                      v-model="account.config.playlistSyncToWyCloudDisk.autoSync.frequency"
+                      v-model="
+                        account.config.playlistSyncToWyCloudDisk.autoSync
+                          .frequency
+                      "
                       :min="1"
                       :max="30"
                       controls-position="right"
                     />
                     <el-radio-group
-                      v-model="account.config.playlistSyncToWyCloudDisk.autoSync.frequencyUnit"
+                      v-model="
+                        account.config.playlistSyncToWyCloudDisk.autoSync
+                          .frequencyUnit
+                      "
                     >
                       <el-radio-button label="hour">小时</el-radio-button>
                       <el-radio-button label="day">天</el-radio-button>
@@ -186,7 +234,10 @@
 
                 <el-form-item label="音质偏好">
                   <el-radio-group
-                    v-model="account.config.playlistSyncToWyCloudDisk.soundQualityPreference"
+                    v-model="
+                      account.config.playlistSyncToWyCloudDisk
+                        .soundQualityPreference
+                    "
                   >
                     <el-radio-button label="high">高质量</el-radio-button>
                     <el-radio-button label="lossless">无损</el-radio-button>
@@ -196,19 +247,72 @@
                 <el-form-item label="同步选项">
                   <div class="sync-options">
                     <el-checkbox
-                      v-model="account.config.playlistSyncToWyCloudDisk.syncWySong"
+                      v-model="
+                        account.config.playlistSyncToWyCloudDisk.syncWySong
+                      "
                     >
                       上传网易云已有歌曲到云盘
                       <el-tag size="small" type="success">推荐</el-tag>
                     </el-checkbox>
                     <el-checkbox
-                      v-model="account.config.playlistSyncToWyCloudDisk.syncNotWySong"
+                      v-model="
+                        account.config.playlistSyncToWyCloudDisk.syncNotWySong
+                      "
                     >
                       解锁灰色歌曲
-                      <el-tag size="small" type="warning">不推荐自动同步</el-tag>
+                      <el-tag size="small" type="warning"
+                        >不推荐自动同步</el-tag
+                      >
                     </el-checkbox>
                   </div>
                 </el-form-item>
+
+                <el-card
+                  class="info-card"
+                  shadow="hover"
+                  v-if="
+                    account.config.playlistSyncToWyCloudDisk.autoSync.enable
+                  "
+                >
+                  <template #header>
+                    <div class="card-header">
+                      <el-icon><Timer /></el-icon>
+                      <span class="header-text">下次同步时间</span>
+                    </div>
+                  </template>
+
+                  <div
+                    v-if="nextCloudRun && nextCloudRun[account.uid]"
+                    class="next-run-content"
+                  >
+                    <el-row :gutter="20" justify="center" align="middle">
+                      <el-col :span="12" class="next-run-item">
+                        <div class="label">下次同步时间</div>
+                        <div class="value">
+                          {{
+                            new Date(
+                              nextCloudRun[account.uid].nextRunTime
+                            ).toLocaleString()
+                          }}
+                        </div>
+                      </el-col>
+                      <el-col :span="12" class="next-run-item">
+                        <div class="label">距离下次同步</div>
+                        <div class="value">
+                          {{
+                            Math.round(
+                              nextCloudRun[account.uid].remainingMs / 1000 / 60
+                            )
+                          }}
+                          分钟
+                        </div>
+                      </el-col>
+                    </el-row>
+                  </div>
+                  <div v-else class="next-run-content">
+                    <el-empty description="暂无调度信息" :image-size="60" />
+                  </div>
+                </el-card>
               </el-form>
             </div>
           </el-card>
@@ -441,13 +545,60 @@
 :deep(.el-form-item__label) {
   font-weight: 500;
 }
+
+.next-run-content {
+  padding: 20px 0;
+}
+
+.next-run-item {
+  text-align: center;
+}
+
+.next-run-item .label {
+  color: #909399;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.next-run-item .value {
+  color: #303133;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+:deep(.el-empty) {
+  padding: 20px 0;
+}
+
+:deep(.el-card__header) {
+  padding: 15px 20px;
+}
 </style>
 
 <script>
-import { Key, Check, Refresh, UserFilled, QuestionFilled } from '@element-plus/icons-vue'
+import {
+  Key,
+  Check,
+  Refresh,
+  UserFilled,
+  QuestionFilled,
+  Timer,
+} from "@element-plus/icons-vue";
 import { getAccount, setAccount, qrLoginCreate, qrLoginCheck } from "../../api";
 import storage from "../../utils/storage";
 import { ElMessage } from "element-plus";
+import { getNextRunInfo } from "../../api";
 
 export default {
   components: {
@@ -455,7 +606,8 @@ export default {
     Check,
     Refresh,
     UserFilled,
-    QuestionFilled
+    QuestionFilled,
+    Timer,
   },
   data: () => {
     return {
@@ -479,12 +631,14 @@ export default {
             soundQualityPreference: "high",
           },
         },
+        name: "",
       },
       registedMK: false,
       qrLogin: {
         qrCode: "",
         qrKey: "",
       },
+      nextCloudRun: null,
     };
   },
   async mounted() {
@@ -501,6 +655,7 @@ export default {
     this.account = ret.data.account;
     storage.set("wyAccount", ret.data.account.wyAccount);
     console.log(this.account);
+    this.loadNextRunInfo();
   },
   methods: {
     async refreshQRCode() {
@@ -542,7 +697,7 @@ export default {
         console.log("checkQRCode failed");
         return false;
       }
-      // 800 为二维码过期; 801 为等待扫码; 802 为待确认; 803 为授权登录成功
+      // 800 为二维码过期; 801 为等待扫码; 802 为待认; 803 为授权登录成功
       console.log(`checkQRCode wyStatus: ${ret.data.wyQrStatus}`);
       if (ret.data.wyQrStatus == 800) {
         ElMessage({
@@ -624,18 +779,32 @@ export default {
           return;
         }
       }
-
       const ret = await setAccount({
         loginType: this.account.loginType,
         countryCode: this.account.countryCode,
         account: this.account.account,
         password: this.account.password,
         config: this.account.config,
+        name: this.account.name,
       });
+      if (ret.status != 0) {
+        ElMessage({
+          center: true,
+          type: "error",
+          message: ret.message,
+        });
+        return;
+      }
       if (ret.data.account) {
         this.account = ret.data.account;
+
         storage.set("wyAccount", ret.data.account.wyAccount);
       }
+      ElMessage({
+        center: true,
+        type: "success",
+        message: "更新配置成功",
+      });
     },
 
     logoutMK() {
@@ -643,6 +812,21 @@ export default {
       this.registedMK = false;
       this.mk = "";
       this.account = {};
+    },
+
+    async loadNextRunInfo() {
+      const ret = await getNextRunInfo();
+      if (ret.status === 0) {
+        this.nextCloudRun = ret.data.cloudNextRuns;
+      }
+    },
+  },
+  watch: {
+    "account.config.playlistSyncToWyCloudDisk.autoSync": {
+      deep: true,
+      handler() {
+        this.loadNextRunInfo();
+      },
     },
   },
 };

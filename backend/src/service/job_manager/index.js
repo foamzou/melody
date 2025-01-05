@@ -163,6 +163,10 @@ async function findActiveJobByArgs(uid, args) {
             if (job['createdAt'] < JobManagerInitTime) {
                 return false;
             }
+            // 超过 1 小时也认为超时
+            if (Date.now() - job['createdAt'] > 1000 * 60 * 60) {
+                return false;
+            }
             return job;
         }
     });

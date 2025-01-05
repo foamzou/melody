@@ -18,6 +18,7 @@ const asyncFS = require('../../utils/fs');
 module.exports = async function unblockMusicInPlaylist(uid, source, playlistId, options = {
     syncWySong: false,
     syncNotWySong: false,
+    asyncExecute: true,
 }) {
     // step 1. get songs
     const songsInfo = await getSongsFromPlaylist(uid, source, playlistId);
@@ -46,6 +47,9 @@ module.exports = async function unblockMusicInPlaylist(uid, source, playlistId, 
             }
         }
     });
+    if (songsNeedToSync.length === 0) {
+        return BusinessCode.StatusNoNeedToSync;
+    }
 
     // create job
     const args = `unblockMusicInPlaylist: {"source":${source},"playlistId":${playlistId}}`;
@@ -63,9 +67,9 @@ module.exports = async function unblockMusicInPlaylist(uid, source, playlistId, 
         tip: "等待解锁",
         createdAt: Date.now()
     });
-        
+    
     // async do the job
-    (async () => {
+    const job = (async () => {
         const songs = songsNeedToSync;
         logger.info(`${jobId}: try to unblock songs: ${JSON.stringify(songs)}`);
         await JobManager.updateJob(uid, jobId, {
@@ -113,7 +117,12 @@ module.exports = async function unblockMusicInPlaylist(uid, source, playlistId, 
             status: JobStatus.Failed,
             tip,
         });
-    })
+    });
+
+    // For sync execution, wait for job completion
+    if (!options.asyncExecute) {
+        await job;
+    }
 
     return jobId;
 }

@@ -31,8 +31,7 @@ async function getMediaGetInfo(isTempBin = false) {
 
 async function getLatestMediaGetVersion() {
     const remoteConfig = await RemoteConfig.getRemoteConfig();
-    // TODO: 这里应当使用多个备用代理地址，每次将成功的保存到本地缓存，下次优先使用
-    const latestVerisonUrl = `${remoteConfig.githubProxy}/https://raw.githubusercontent.com/foamzou/media-get/main/LATEST_VERSION`;
+    const latestVerisonUrl = `${remoteConfig.bestGithubProxy}https://raw.githubusercontent.com/foamzou/media-get/main/LATEST_VERSION`;
     console.log('start to get latest version from: ' + latestVerisonUrl);
 
     const latestVersion = await httpsGet(latestVerisonUrl);
@@ -46,18 +45,73 @@ async function getLatestMediaGetVersion() {
 
 async function downloadFile(url, filename) {
     return new Promise((resolve) => {
-        const fileStream = fs.createWriteStream(filename);
-        https.get(url, res => {
+        let fileStream = fs.createWriteStream(filename);
+        let receivedBytes = 0;
+
+        const handleResponse = (res) => {
+            // Handle redirects
+            if (res.statusCode === 301 || res.statusCode === 302) {
+                logger.info('Following redirect');
+                fileStream.end();
+                fileStream = fs.createWriteStream(filename);
+                if (res.headers.location) {
+                    https.get(res.headers.location, handleResponse)
+                        .on('error', handleError);
+                }
+                return;
+            }
+
+            // Check for successful status code
+            if (res.statusCode !== 200) {
+                handleError(new Error(`HTTP Error: ${res.statusCode}`));
+                return;
+            }
+
+            const totalBytes = parseInt(res.headers['content-length'], 10);
+
+            res.on('error', handleError);
+            fileStream.on('error', handleError);
+
             res.pipe(fileStream);
-            fileStream.on('finish', () => {
-                fileStream.close(() => resolve(true)); // Successfully downloaded and saved, resolve with true
+
+            res.on('data', (chunk) => {
+                receivedBytes += chunk.length;
             });
-        })
-        .on('error', (error) => {
-            console.error('Download error:', error);
+
+            fileStream.on('finish', () => {
+                fileStream.close(() => {
+                    if (receivedBytes === 0) {
+                        fs.unlink(filename, () => {
+                            logger.error('Download failed: Empty file received');
+                            resolve(false);
+                        });
+                    } else if (totalBytes && receivedBytes < totalBytes) {
+                        fs.unlink(filename, () => {
+                            logger.error(`Download incomplete: ${receivedBytes}/${totalBytes} bytes`);
+                            resolve(false);
+                        });
+                    } else {
+                        resolve(true);
+                    }
+                });
+            });
+        };
+
+        const handleError = (error) => {
             fileStream.destroy();
-            fs.unlink(filename, () => resolve(false)); // On error, delete the file and resolve with false
-        });
+            fs.unlink(filename, () => {
+                logger.error('Download error:', error);
+                resolve(false);
+            });
+        };
+
+        const req = https.get(url, handleResponse)
+            .on('error', handleError)
+            .setTimeout(60000, () => {
+                handleError(new Error('Download timeout'));
+            });
+
+        req.on('error', handleError);
     });
 }
 
@@ -73,7 +127,7 @@ async function getMediaGetRemoteFilename(latestVersion) {
         suffix += '-arm64';
     }
     const remoteConfig = await RemoteConfig.getRemoteConfig();
-    return `${remoteConfig.githubProxy}/https://github.com/foamzou/media-get/releases/download/v${latestVersion}/media-get-${latestVersion}-${suffix}`;
+    return `${remoteConfig.bestGithubProxy}https://github.com/foamzou/media-get/releases/download/v${latestVersion}/media-get-${latestVersion}-${suffix}`;
 }
 
 const renameFile = (oldName, newName) => {

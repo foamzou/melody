@@ -66,6 +66,23 @@ module.exports = {
                 return false;
             }
             return JSON.parse(ret);
+        },
+        setPlaylistMeta: async function(playlistID, meta) {
+            const key = `playlist-${playlistID}`;
+            return await set('fileSyncMeta', key, JSON.stringify({
+                songIDs: meta.songIDs || [],
+                // 预留其他字段
+            }));
+        },
+        getPlaylistMeta: async function(playlistID) {
+            const key = `playlist-${playlistID}`;
+            const ret = await get('fileSyncMeta', key);
+            if (!ret) {
+                return {
+                    songIDs: []
+                };
+            }
+            return JSON.parse(ret);
         }
     }
 };

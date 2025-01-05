@@ -1,6 +1,10 @@
 const logger = require('consola');
 const fs = require('fs');
 const process = require('process');
+
+initDir();
+initAccountFileIfNotExisted();
+
 const mediaGet = require('./service/media_fetcher/media_get');
 
 function initDir() {
@@ -29,10 +33,6 @@ function initAccountFileIfNotExisted() {
 }
 
 module.exports = async function() {
-    initDir();
-
-    initAccountFileIfNotExisted();
-
     // check if media-get is installed
     const mediaGetInfo = await mediaGet.getMediaGetInfo();
     if (mediaGetInfo === false) {
