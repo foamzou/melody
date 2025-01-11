@@ -39,3 +39,4 @@ router.post('/api/config/global', asyncWrapper(Config.setGlobalConfig));
 router.get('/api/scheduler/next-run', asyncWrapper(Scheduler.getNextRun));
 
 module.exports = router;
+ 

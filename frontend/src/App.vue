@@ -166,6 +166,7 @@
 import { getPlayUrl, getSongsMeta, createSyncSongFromUrlJob } from "./api";
 import { startTaskListener } from "./components/TaskNotification";
 import storage from "./utils/storage";
+import { getProperPlayUrl } from "./utils/audio";
 
 export default {
   data: () => {
@@ -232,7 +233,12 @@ export default {
       const resourceForbidden = info.resourceForbidden;
       const songUrl = info.audios[0].url;
       console.log("play: ", songUrl);
-      this.playerSongInfo.playUrl = songUrl;
+      this.playerSongInfo.playUrl = getProperPlayUrl(
+        info.source,
+        songUrl,
+        pageUrl || info.pageUrl
+      );
+
       this.playerSongInfo.coverUrl = info.coverUrl;
       this.playerSongInfo.songName = info.songName;
       this.playerSongInfo.artist = info.artist;
@@ -240,12 +246,18 @@ export default {
       this.playerSongInfo.suggestMatchSongId = suggestMatchSongId;
     },
     async playTheSongWithPlayUrl(playOption) {
-      const playUrlRet = await getPlayUrl(playOption.songId);
-      if (playUrlRet.data.playUrl) {
-        playOption.playUrl = playUrlRet.data.playUrl;
+      if (!playOption.playUrl) {
+        const playUrlRet = await getPlayUrl(playOption.songId);
+        if (playUrlRet.data.playUrl) {
+          playOption.playUrl = playUrlRet.data.playUrl;
+        }
       }
 
-      this.playerSongInfo.playUrl = playOption.playUrl;
+      this.playerSongInfo.playUrl = getProperPlayUrl(
+        playOption.source,
+        playOption.playUrl,
+        playOption.pageUrl
+      );
       this.playerSongInfo.coverUrl = playOption.coverUrl;
       this.playerSongInfo.songName = playOption.songName;
       this.playerSongInfo.artist = playOption.artist;

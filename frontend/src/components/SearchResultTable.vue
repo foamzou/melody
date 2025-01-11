@@ -107,7 +107,7 @@
                 type="warning"
                 circle
                 class="operation-btn"
-                @click="window.open(scope.row.url, '_blank')"
+                @click="openSourceUrl(scope.row.url)"
               >
                 <i class="bi bi-box-arrow-up-right"></i>
               </el-button>
@@ -283,6 +283,26 @@ export default {
     abort() {
       this.currentSongUrl = -1;
       this.abortTheSong();
+    },
+    openSourceUrl(url) {
+      try {
+        if (typeof window !== "undefined" && window?.open) {
+          window.open(url, "_blank", "noopener,noreferrer");
+        } else {
+          // 降级方案
+          const link = document.createElement("a");
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      } catch (error) {
+        console.error("Failed to open URL:", error);
+        // 可以添加用户提示
+        ElMessage.error("打开链接失败，请尝试复制链接手动打开");
+      }
     },
   },
 };

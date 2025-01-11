@@ -108,6 +108,7 @@ import { startTaskListener } from "./components/TaskNotification";
 import Player from "./components/Player.vue";
 import storage from "./utils/storage";
 import { Notify } from "vant";
+import { getProperPlayUrl } from "./utils/audio";
 
 export default {
   setup() {
@@ -156,12 +157,18 @@ export default {
         console.log(ret);
       }
 
-      const resourceForbidden = info.resourceForbidden;
       const songUrl = info.audios[0].url;
       console.log("play: ", songUrl);
 
+      // 处理播放 URL
+      const processedPlayUrl = getProperPlayUrl(
+        info.source,
+        songUrl,
+        pageUrl || info.pageUrl
+      );
+
       this.songInfos.push({
-        playUrl: songUrl,
+        playUrl: processedPlayUrl,
         coverUrl: info.coverUrl,
         songName: info.songName,
         artist: info.artist,

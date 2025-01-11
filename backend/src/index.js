@@ -13,19 +13,22 @@ const port = 5566;
 
 const schedulerService = require('./service/scheduler');
 
-
-
 require('./init_app')().then(() => {
   const middlewareHandleError = require('./middleware/handle_error');
   const middlewareAuth = require('./middleware/auth');
-
-  app.use('/api', middlewareAuth);
+  const proxy = require('./handler/proxy');
 
   app.use(bodyParser.json());
   app.use(cors({
     origin: true,
     credentials: true,
   }));
+
+  // 先注册代理路由,跳过 auth 验证
+  app.get('/api/proxy/audio', proxy.proxyAudio);
+  
+  // 其他 API 路由需要 auth
+  app.use('/api', middlewareAuth);
   app.use('/', require('./router')); 
   app.use(middlewareHandleError);
   

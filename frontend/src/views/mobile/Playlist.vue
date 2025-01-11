@@ -237,6 +237,7 @@ import SearchResultList from "../../components/SearchResultListForMobile.vue";
 import { startTaskListener } from "../../components/TaskNotificationForMobile";
 import { Notify, Dialog } from "vant";
 import { ref } from "vue";
+import { getProperPlayUrl } from "../../utils/audio";
 
 export default {
   data: () => {
@@ -285,6 +286,16 @@ export default {
         this.searchTheSong(playOption.pageUrl);
         return;
       }
+
+      // 处理 playUrl
+      if (playOption.playUrl) {
+        playOption.playUrl = getProperPlayUrl(
+          playOption.source,
+          playOption.playUrl,
+          playOption.pageUrl
+        );
+      }
+
       if (await this.playTheSongWithPlayUrl(playOption)) {
         this.currentSongUrl = playOption.pageUrl;
       }
