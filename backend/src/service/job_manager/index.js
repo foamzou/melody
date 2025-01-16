@@ -7,6 +7,8 @@ const JobStatus = require('../../consts/job_status');
 const DataPath = `${__dirname}/../../../.profile/data`;
 const JobDataPath = `${DataPath}/jobs`;
 
+const JobManagerInitTime = Date.now();
+
 async function listJobs(uid) {
     const list = [];
     const jobs = await getUserJobs(uid);
@@ -157,6 +159,14 @@ async function findActiveJobByArgs(uid, args) {
     const jobs = await listJobs(uid);
     return jobs.find(job => {
         if (job['args'] === args && job['status'] !== JobStatus.Failed && job['status'] !== JobStatus.Finished) {
+            // 如果创建时间 早于 组件 init 时间，那么认为是无效的 job（意味着服务重启了，而目前 job 不支持重启服务后继续 run）
+            if (job['createdAt'] < JobManagerInitTime) {
+                return false;
+            }
+            // 超过 1 小时也认为超时
+            if (Date.now() - job['createdAt'] > 1000 * 60 * 60) {
+                return false;
+            }
             return job;
         }
     });

@@ -1,18 +1,23 @@
 const { fetchWithUrl, getMetaWithUrl } = require('../media_fetcher');
-const { uploadSong, searchSong, matchAndFixCloudSong } = require('../music_platform/wycloud');
 const logger = require('consola');
 const sleep = require('../../utils/sleep');
 const findTheBestMatchFromWyCloud = require('../search_songs/find_the_best_match_from_wycloud');
 const JobManager = require('../job_manager');
 const JobStatus = require('../../consts/job_status');
+const JobType = require('../../consts/job_type');
+const configManager = require('../config_manager');
 const fs = require('fs');
+const libPath = require('path');
+const utilFs = require('../../utils/fs');
+const { downloadFromLocalTmpPath } = require('./download_to_local');
+const uploadWithRetryThenMatch = require('./upload_to_wycloud_disk_with_retry_then_match');
 
 module.exports = async function syncSingleSongWithUrl(uid, url, {
     songName = "",
     artist = "",
     album = "",
     songFromWyCloud = null
-} = {}, jobId = 0) {
+} = {}, jobId = 0, jobType = JobType.SyncSongFromUrl, playlistName = "", collectRet) {
     // step 1. fetch song info
     const songInfo = await getMetaWithUrl(url);
     logger.info(songInfo);
@@ -21,7 +26,7 @@ module.exports = async function syncSingleSongWithUrl(uid, url, {
         return false;
     }
 
-    await updateJobIfNeed(uid, jobId, songInfo);
+    await updateJobIfNeed(uid, jobId, songInfo, jobType);
 
     // step 2. find the best match from wycloud
     if (songFromWyCloud === null) {
@@ -54,62 +59,25 @@ module.exports = async function syncSingleSongWithUrl(uid, url, {
         return false;
     }
 
-    // step 4. upload
-    logger.info(`upload song start: ${path}`);
-    let isUploadSucceed = false;
-    let uploadResult;
-    const startTime = new Date();
-    for (let tryCount = 0; tryCount < 5; tryCount++) {
-        if (tryCount !== 0) {
-            logger.info(`upload song failed, try again: ${path}`);
-        }
-        uploadResult = await uploadSong(uid, path);
-        if (uploadResult === false) {
-            logger.error(`upload song failed, uid: ${uid}, path: ${path}`);
-            await sleep(3000);
-            continue;
-        } else {
-            isUploadSucceed = true;
-            break;
-        }
+    // step 4. upload or download
+    logger.info(`handle song start: ${path}`);
+
+    if (jobType === JobType.DownloadSongFromUrl || jobType === JobType.SyncThePlaylistToLocalService) {
+        return await downloadFromLocalTmpPath(path, songInfo, playlistName, collectRet);
+    } else {
+        return await uploadWithRetryThenMatch(uid, path, songInfo, songFromWyCloud);
     }
-
-    // del file async
-    fs.unlink(path, () => {});
-
-    if (!isUploadSucceed) {
-        logger.error(`upload song failed, uid: ${uid}, path: ${path}`);
-        return "uploadFailed";
-    }
-
-    const costSeconds = (new Date() - startTime) / 1000;
-    logger.info(`upload song success, uid: ${uid}, path: ${path}, cost: ${costSeconds}s`);
-
-    if (uploadResult.matched) {
-        logger.info(`matched song already, uid: ${uid}, songId: ${uploadResult.songId}. ignore.`);
-        return true;
-    }
-
-    // step 5. fix match manually IF not matched in music platform
-    if (!songFromWyCloud) {
-        logger.info(`would not try to match from wycloud!!! uid: ${uid}, ${JSON.stringify(songInfo)}`);
-        return true;
-    }
-    const matchResult = await matchAndFixCloudSong(uid, uploadResult.songId, songFromWyCloud.songId);
-    logger.info(`match song ${matchResult ? 'success' : 'failed'}, uid: ${uid}, songId: ${uploadResult.songId}, wySongId: ${songFromWyCloud.songId}`);
-
-    return true;
 }
 
-async function updateJobIfNeed(uid, jobId, songInfo) {
+async function updateJobIfNeed(uid, jobId, songInfo, jobType) {
     if (!jobId) {
         return;
     }
+    const operation = jobType === JobType.SyncSongFromUrl ? "上传" : "下载";
     await JobManager.updateJob(uid, jobId, {
-        name: `上传歌曲：${songInfo.songName}`,
+        name: `${operation}歌曲：${songInfo.songName}`,
         status: JobStatus.InProgress,
         desc: `歌曲: ${songInfo.songName}`,
         tip: "任务开始",
     });
 }
-

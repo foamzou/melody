@@ -8,7 +8,7 @@ axiosApiInstance.defaults.baseURL = import.meta.env.VITE_APP_API_URL
 //允许跨域携带cookie信息
 axiosApiInstance.defaults.withCredentials = true; 
 //设置超时
-axiosApiInstance.defaults.timeout = 10000;
+axiosApiInstance.defaults.timeout = 12000;
 
 axiosApiInstance.interceptors.request.use(
     config => {
@@ -24,45 +24,51 @@ axiosApiInstance.interceptors.request.use(
 
 axiosApiInstance.interceptors.response.use(
     response => {
-        if (response.status >= 200 && response.status < 300) {
-            return Promise.resolve(response);
-        } else {
-            return Promise.reject(response);
-        }
+        return Promise.resolve(response);
     },
     error => {
-        console.log('error in response', error);
-        Promise.reject(error);
+        // 返回错误响应中的数据
+        if (error.response && error.response.data) {
+            return Promise.resolve(error.response);
+        }
+        // 如果没有response.data，返回一个统一的错误格式
+        return Promise.resolve({
+            data: {
+                code: -1,
+                message: error.message || '网络错误'
+            }
+        });
     }
 );
-    export const post = (url, data) => {
-        return new Promise((resolve, reject) => {
-            axiosApiInstance({
-                    method: 'post',
-                    url,
-                    data,
-                })
-                .then(res => {
-                    resolve(res ? res.data : false)
-                })
-                .catch(err => {
-                    reject(err)
-                });
-        })
-    };
 
-    export const get = (url, data) => {
-        return new Promise((resolve, reject) => {
-            axiosApiInstance({
-                    method: 'get',
-                    url,
-                    params: data,
-                })
-                .then(res => {
-                    resolve(res ? res.data : false)
-                })
-                .catch(err => {
-                    reject(err)
-                })
-        })
-    }
+export const post = (url, data) => {
+    return new Promise((resolve, reject) => {
+        axiosApiInstance({
+                method: 'post',
+                url,
+                data,
+            })
+            .then(res => {
+                resolve(res ? res.data : false)
+            })
+            .catch(err => {
+                reject(err.data)
+            });
+    })
+};
+
+export const get = (url, data) => {
+    return new Promise((resolve, reject) => {
+        axiosApiInstance({
+                method: 'get',
+                url,
+                params: data,
+            })
+            .then(res => {
+                resolve(res ? res.data : false)
+            })
+            .catch(err => {
+                reject(err)
+            })
+    })
+}

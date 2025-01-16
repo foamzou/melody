@@ -237,6 +237,7 @@ import SearchResultList from "../../components/SearchResultListForMobile.vue";
 import { startTaskListener } from "../../components/TaskNotificationForMobile";
 import { Notify, Dialog } from "vant";
 import { ref } from "vue";
+import { getProperPlayUrl } from "../../utils/audio";
 
 export default {
   data: () => {
@@ -285,6 +286,16 @@ export default {
         this.searchTheSong(playOption.pageUrl);
         return;
       }
+
+      // 处理 playUrl
+      if (playOption.playUrl) {
+        playOption.playUrl = getProperPlayUrl(
+          playOption.source,
+          playOption.playUrl,
+          playOption.pageUrl
+        );
+      }
+
       if (await this.playTheSongWithPlayUrl(playOption)) {
         this.currentSongUrl = playOption.pageUrl;
       }
@@ -301,7 +312,11 @@ export default {
           type: "primary",
           duration: 1000,
         });
-        const ret = await createSyncSongFromPlaylistJob(playlistId);
+        const ret = await createSyncSongFromPlaylistJob(playlistId, {
+          // TODO 先 hard code，后面 mobile 端再做配置
+          syncWySong: false,
+          syncNotWySong: true,
+        });
         console.log(ret);
 
         if (ret.data && ret.data.jobId) {

@@ -22,7 +22,9 @@
     "consola": "^2.15.3",
     "cors": "^2.8.5",
     "express": "^4.17.2",
+    "got": "11",
     "md5": "^2.3.0",
+    "node-schedule": "^2.1.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

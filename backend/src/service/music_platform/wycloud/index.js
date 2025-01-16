@@ -115,9 +115,10 @@ async function getSongInfo(uid, id) {
     };
 }
 
-async function getPlayUrl(uid, id) {
+async function getPlayUrl(uid, id, isLossless = false) {
     const response = await safeRequest(uid, song_url, {
         id,
+        br: isLossless ? 999000 : 320000
     });
     if (response === false) {
         return '';
@@ -172,6 +173,8 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
         logger.error(`uid(${uid}) playlist(${playlistId}) has no songs.`, detailResponse, songsResponse);
         return false;
     }
+    // console.log(JSON.stringify(songsResponse, null, 4));
+    // ddd
     if (songsResponse.songs.length >= 1000) {
         const songsPage2Response = await safeRequest(uid, playlist_track_all, {
             id: playlistId,
@@ -201,11 +204,16 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
             return false;
         } 
         
+        // 收费歌曲
         if (song.fee === 1) {
+            if (song.realPayed === 1 || song.payed === 1) {
+                return false;
+            }
             return true;
         }
-        // blocked or need to pay: subp == 0 && realpayed !== 1
-        if (song.subp != 0 || song.realPayed === 1) {
+        // subp 或 cp === 1 可能都表示有版权
+        // 免费歌曲
+        if (song.subp === 1) {
             return false;
         }
 
@@ -224,11 +232,12 @@ async function getSongsFromPlaylist(uid, source, playlistId) {
             songId: songInfo.id,
             songName: songInfo.name,
             artists: songInfo.ar.map(artist => artist.name),
+            artist: songInfo.ar.length > 0 ? songInfo.ar[0].name : '',
             duration: songInfo.dt / 1000,
             album: songInfo.al.name,
             cover: songInfo.al.picUrl,
             pageUrl: `https://music.163.com/song?id=${songInfo.id}`,
-            playUrl: !isBlocked && !isCloud ? `http://music.163.com/song/media/outer/url?id=${songInfo.id}.mp3` : '',
+            playUrl: !isBlocked && !isCloud ? `http://music.163.com/song/media/outer/url?id=${songInfo.id}.mp3` : '', // 不再建议使用这个 url，建议每次都 Call API 获取
             isBlocked,
             isCloud,
         });
@@ -274,6 +283,11 @@ async function qrLoginCheck(uid, qrKey) {
     };
 }
 
+async function verifyAccountStatus(uid) {
+    const account = await getMyAccount(uid);
+    return account !== false;
+}
+
 async function safeRequest(uid, moduleFunc, params, cookieRequired = true) {
     try {
         const response = await requestApi(uid, moduleFunc, params, cookieRequired);
@@ -300,4 +314,5 @@ module.exports = {
     getPlayUrl: getPlayUrl,
     qrLoginCreate: qrLoginCreate,
     qrLoginCheck: qrLoginCheck,
+    verifyAccountStatus: verifyAccountStatus,
 }

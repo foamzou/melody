@@ -23,9 +23,30 @@ export const createSyncSongFromUrlJob = (url, songId = "") => {
         }
     });
 };
-export const createSyncSongFromPlaylistJob = (playlistId) => {
+export const createDownloadSongFromUrlJob = (url, songId = "") => {
+    return post("/sync-jobs", {
+        "jobType": "DownloadSongFromUrl",
+        "urlJob": {
+            "url": url,
+            "meta": {
+                "songId": songId
+            }
+        }
+    });
+};
+export const createSyncSongFromPlaylistJob = (playlistId, options) => {
     return post("/sync-jobs", {
         "jobType": "UnblockedPlaylist",
+        "playlist": {
+            "id": playlistId,
+            "source": "netease"
+        },
+        "options": options
+    });
+};
+export const createSyncThePlaylistToLocalServiceJob = (playlistId) => {
+    return post("/sync-jobs", {
+        "jobType": "SyncThePlaylistToLocalService",
         "playlist": {
             "id": playlistId,
             "source": "netease"
@@ -51,3 +72,7 @@ export const getGlobalConfig = _ => get("/config/global", {});
 export const setGlobalConfig = (config) => {
     return post("/config/global", config);
 };
+
+export const getAllAccounts = _ => get("/accounts", {});
+
+export const getNextRunInfo = () => get("/scheduler/next-run", {});

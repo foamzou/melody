@@ -87,7 +87,7 @@
 import { nextTick, ref } from "vue";
 import * as Howler from "howler";
 import { secondDurationToDisplayDuration, sleep } from "../utils";
-import { createSyncSongFromUrlJob } from "../api";
+import { createSyncSongFromUrlJob, createDownloadSongFromUrlJob } from "../api";
 import { startTaskListener } from "./TaskNotificationForMobile";
 
 let playerCtl;
@@ -96,6 +96,7 @@ let currentPlayId;
 const ActionUpload = 0;
 const ActionDownload = 1;
 const ActionOpenRef = 2;
+const ActionDownloadToLocalService = 3;
 
 export default {
   data() {
@@ -213,10 +214,28 @@ export default {
         startTaskListener(ret.data.jobId);
       }
     },
+    async downloadToLocalService() {
+      if (!this.currentSong) {
+        return;
+      }
+      console.log(this.currentSong);
+      const ret = await createDownloadSongFromUrlJob(
+        this.currentSong.pageUrl,
+        this.currentSong.suggestMatchSongId ?? 0
+      );
+      console.log(ret);
+
+      if (ret.data && ret.data.jobId) {
+        startTaskListener(ret.data.jobId);
+      }
+    },
     async onSelect(actionItem) {
       switch (actionItem.action) {
         case ActionUpload:
           this.uploadToCloud();
+          break;
+        case ActionDownloadToLocalService:
+          this.downloadToLocalService();
           break;
         case ActionDownload:
           const a = document.createElement("a");
@@ -244,7 +263,8 @@ export default {
     const showPopover = ref(false);
     const actions = [
       { text: "上传到云盘", icon: "upgrade", action: ActionUpload },
-      { text: "下载到本地", icon: "down", action: ActionDownload },
+      { text: "下载到浏览器本地", icon: "down", action: ActionDownload },
+      { text: "下载到服务器", icon: "down", action: ActionDownloadToLocalService },
       { text: "打开源站", icon: "share", action: ActionOpenRef },
     ];
 

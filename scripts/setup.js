@@ -32,7 +32,7 @@ const runCmd = (cmd, shouldOutput = true, cwd = null) => {
 const runCmdAndExitWhenFailed = async (cmd, msg, shouldOutput = true, cwd = null) => {
     const ret = await runCmd(cmd, shouldOutput, cwd);
     if (ret.code !== 0) {
-        l(msg);
+        l(msg, 'should exit');
         process.exit(1);
     }
     return ret;

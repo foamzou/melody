@@ -16,16 +16,21 @@ async function set(req, res) {
     const accountName = req.body.account;
     const password = req.body.password;
     const countryCode = req.body.countryCode;
-    if (!accountName || !password) {
-        res.status(422).send({
-            status: 1,
-            message: 'account or password is empty',
-            data: {}
-        });
-        return;
+    const config = req.body.config;
+    const name = req.body.name;
+
+    if (name) {
+        // check if the name is already used by other accounts
+        const allAccounts = await AccountService.getAllAccountsWithoutSensitiveInfo();
+        for (const account of Object.values(allAccounts)) {
+            if (account.name === name && account.uid !== req.account.uid) {
+                res.status(412).send({ status: 1, message: '昵称已被占用啦，请换一个试试吧', data: {} });
+                return;
+            }
+        }
     }
 
-    const ret = await AccountService.setAccount(req.account.uid, loginType, accountName, password, countryCode);
+    const ret = await AccountService.setAccount(req.account.uid, loginType, accountName, password, countryCode, config, name);
     res.send({
         status: ret ? 0 : 1,
         data: {
@@ -74,7 +79,7 @@ async function qrLoginCheck(req, res) {
         req.account.account = account.wyAccount.userId;
         storeCookie(req.account.uid, req.account, loginCheckRet.cookie);
 
-        AccountService.setAccount(req.account.uid, 'qrcode', account.wyAccount.userId, '');
+        AccountService.setAccount(req.account.uid, 'qrcode', account.wyAccount.userId, '', null);
         account = await getWyAccountInfo(req.account.uid);
     }
     res.send({
@@ -86,9 +91,18 @@ async function qrLoginCheck(req, res) {
     });
 }
 
+async function getAllAccounts(req, res) {
+    const data = await AccountService.getAllAccountsWithoutSensitiveInfo();
+    res.send({
+        status: 0,
+        data: data
+    });
+}
+
 module.exports = {
     get: get,
     set: set,
     qrLoginCreate,
     qrLoginCheck,
+    getAllAccounts,
 }

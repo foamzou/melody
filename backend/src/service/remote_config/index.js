@@ -1,23 +1,69 @@
 const httpsGet = require('../../utils/network').asyncHttpsGet;
 const logger = require('consola');
+const configManager = require('../config_manager');
 
+// Store best proxy in memory for performance
+let cachedBestProxy = '';
+
+async function validateGithubAccess(proxy = '') {
+    try {
+        const testUrl = proxy ? `${proxy}https://api.github.com/zen` : 'https://api.github.com/zen';
+        const response = await httpsGet(testUrl);
+        return response !== null;
+    } catch (err) {
+        return false;
+    }
+}
+
+async function findBestProxy(proxyList) {
+    // Always try direct access first
+    if (await validateGithubAccess()) {
+        cachedBestProxy = '';
+        return '';
+    }
+
+    // Try cached proxy if available
+    if (cachedBestProxy && await validateGithubAccess(cachedBestProxy)) {
+        return cachedBestProxy;
+    }
+
+    // Test each proxy in the list
+    for (const proxy of proxyList) {
+        if (proxy && await validateGithubAccess(proxy)) {
+            cachedBestProxy = proxy;
+            return proxy;
+        }
+    }
+    
+    logger.warn('No working GitHub access found, either direct or via proxy');
+    return ''; // Return empty string if no working access found
+}
 
 async function getRemoteConfig() {
     const fallbackConfig = {
-        githubProxy: 'https://mirror.ghproxy.com/',
+        githubProxy: ['', 'https://ghp.ci/'],
     }
-    const remoteConfigUrl = 'https://foamzou.com/tools/melody-config.php';
+    
+    const remoteConfigUrl = 'https://foamzou.com/tools/melody-config.php?v=2';
     const remoteConfig = await httpsGet(remoteConfigUrl);
+    
+    let config = {};
     if (remoteConfig === null) {
-        logger.error('get remote config failed, use fallback config');
-        return fallbackConfig;
+        config = fallbackConfig;
+    } else {
+        config = JSON.parse(remoteConfig);
     }
-    const config = JSON.parse(remoteConfig);
+
+    let bestGithubProxy = await findBestProxy(config.githubProxy);
+    if (bestGithubProxy !== '' && !bestGithubProxy.endsWith('/')) {
+        bestGithubProxy = bestGithubProxy + '/';
+    }
+
     return {
-        githubProxy: config.githubProxy,
+        bestGithubProxy,
     }
 }
 
 module.exports = {
-    getRemoteConfig: getRemoteConfig,
+    getRemoteConfig,
 }

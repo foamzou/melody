@@ -3,7 +3,7 @@ const { unblockMusicInPlaylist, unblockMusicWithSongId } = require('../service/s
 const JobType = require('../consts/job_type');
 const Source = require('../consts/source').consts;
 const { matchUrlFromStr } = require('../utils/regex');
-const { syncSingleSongWithUrl } = require('../service/sync_music');
+const { syncSingleSongWithUrl, syncPlaylist } = require('../service/sync_music');
 const findTheBestMatchFromWyCloud = require('../service/search_songs/find_the_best_match_from_wycloud');
 const JobManager = require('../service/job_manager');
 const JobStatus = require('../consts/job_status');
@@ -15,38 +15,47 @@ async function createJob(req, res) {
     const request = req.body;
 
     const jobType = request.jobType;
+    const options = request.options;
     let jobId = 0;
 
-    if (jobType === JobType.UnblockedPlaylist) {
+    if (jobType === JobType.UnblockedPlaylist || jobType === JobType.SyncThePlaylistToLocalService) {
         const source = request.playlist && request.playlist.source;
         const playlistId = request.playlist && request.playlist.id;
 
         if (source !== Source.Netease.code || !playlistId) {
-            res.status(429).send({
+            res.status(412).send({ 
                 status: 1,
                 message: "source or id is invalid",
             });
             return;
         }
-        jobId = await unblockMusicInPlaylist(uid, source, playlistId)
+        if (jobType === JobType.UnblockedPlaylist) {
+            jobId = await unblockMusicInPlaylist(uid, source, playlistId, {
+                syncWySong: options.syncWySong,
+                syncNotWySong: options.syncNotWySong,
+                asyncExecute: true,
+            });
+        } else {
+            jobId = await syncPlaylist(uid, source, playlistId)
+        }
     } else if (jobType === JobType.UnblockedSong) {
         const source = request.source;
         const songId = request.songId;
 
         if (source !== Source.Netease.code || !songId) {
-            res.status(429).send({
+            res.status(412).send({
                 status: 1,
                 message: "source or id is invalid",
             });
             return;
         }
         jobId = await unblockMusicWithSongId(uid, source, songId)
-    } else if (jobType === JobType.SyncSongFromUrl) {
+    } else if (jobType === JobType.SyncSongFromUrl || jobType === JobType.DownloadSongFromUrl) {
         const request = req.body;
         const url = request.urlJob && matchUrlFromStr(request.urlJob.url);
 
         if (!url) {
-            res.status(429).send({
+            res.status(412).send({
                 status: 1,
                 message: "url is invalid",
             });
@@ -73,7 +82,7 @@ async function createJob(req, res) {
             });
             if (!songFromWyCloud) {
                 logger.error(`song not found in wycloud`);
-                res.status(429).send({
+                res.status(412).send({
                     status: 1,
                     message: "can not find song in wycloud with your songId",
                 });
@@ -83,33 +92,34 @@ async function createJob(req, res) {
         }
     
         // create job
-        const args = `SyncSongFromUrl: {"url":${url}}`;
+        const args = `${jobType}: {"url":${url}}`;
         if (await JobManager.findActiveJobByArgs(uid, args)) {
-            logger.info(`SyncSongFromUrl job is already running.`);
+            logger.info(`${jobType} job is already running.`);
             jobId = BusinessCode.StatusJobAlreadyExisted;
         } else {
+            const operation = jobType === JobType.SyncSongFromUrl ? "上传" : "下载";
             jobId = await JobManager.createJob(uid, {
-                name: `上传歌曲：${meta.songName ? meta.songName : url}`,
+                name: `${operation}歌曲：${meta.songName ? meta.songName : url}`,
                 args,
-                type: JobType.SyncSongFromUrl,
+                type: jobType,
                 status: JobStatus.Pending,
                 desc: `歌曲：${meta.songName ? meta.songName : url}`,
                 progress: 0,
-                tip: "等待上传",
+                tip: `等待${operation}`,
                 createdAt: Date.now()
             });
     
             // async job
-            syncSingleSongWithUrl(req.account.uid, url, meta, jobId).then(async ret => {
+            syncSingleSongWithUrl(req.account.uid, url, meta, jobId, jobType).then(async ret => {
                 await JobManager.updateJob(uid, jobId, {
-                    status: ret ? JobStatus.Finished : JobStatus.Failed,
+                    status: ret === true ? JobStatus.Finished : JobStatus.Failed,
                     progress: 1,
-                    tip: ret ? "上传成功" : "上传失败",
+                    tip: ret === true ? `${operation}成功` : `${operation}失败`,
                 });
             })
         }
     } else {
-        res.status(429).send({
+        res.status(412).send({
             status: 1,
             message: "jobType is not supported",
         });
@@ -118,7 +128,7 @@ async function createJob(req, res) {
 
     if (jobId === false) {
         logger.error(`create job failed, uid: ${uid}`);
-        res.status(429).send({
+        res.status(412).send({
             status: 1,
             message: "create job failed",
         });
@@ -126,9 +136,16 @@ async function createJob(req, res) {
     }
 
     if (jobId === BusinessCode.StatusJobAlreadyExisted) {
-        res.status(429).send({
+        res.status(412).send({
             status: BusinessCode.StatusJobAlreadyExisted,
             message: "你的任务已经在跑啦，等等吧",
+        });
+        return;
+    }
+    if (jobId === BusinessCode.StatusJobNoNeedToCreate) {
+        res.status(412).send({
+            status: BusinessCode.StatusJobAlreadyExisted,
+            message: "你的任务无需被创建，可能是因为没有需要 sync 的歌曲",
         });
         return;
     }

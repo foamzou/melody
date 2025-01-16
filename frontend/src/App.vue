@@ -57,18 +57,20 @@
           </el-col>
         </el-row>
 
-        <el-row class="nav" style="text-align: center">
-          <el-col :span="3">
-            <el-link type="primary" @click="search()">搜索</el-link>
-          </el-col>
-          <el-col :span="3">
-            <el-link type="primary" @click="playlist()">我的歌单</el-link>
-          </el-col>
-          <el-col :span="3">
-            <el-link type="primary" @click="account()">我的音乐账号</el-link>
-          </el-col>
-          <el-col :span="3">
-            <el-link type="primary" @click="setting()">设置</el-link>
+        <el-row class="nav-container">
+          <el-col :span="12" :offset="6">
+            <div class="nav-menu">
+              <div
+                v-for="(item, index) in navItems"
+                :key="index"
+                class="nav-item"
+                :class="{ active: currentPath === item.path }"
+                @click="navigate(item.path)"
+              >
+                <i :class="item.icon"></i>
+                <span>{{ item.label }}</span>
+              </div>
+            </div>
           </el-col>
         </el-row>
       </el-header>
@@ -85,43 +87,40 @@
         </transition>
       </router-view>
       <el-footer
-        style="
-          height: 60px;
-          background: black;
-          width: 100%;
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          z-index: 10;
-        "
+        v-if="playerSongInfo.playUrl"
+        height="70px"
+        class="player-footer"
       >
-        <div style="color: white">
-          <el-row>
-            <el-col :span="2" :offset="1">
-              <el-image
-                v-if="playerSongInfo.coverUrl"
-                :src="playerSongInfo.coverUrl"
-                style="padding: 6px; width: 50px; height: 50px"
-              />
+        <div class="player-container">
+          <el-row align="middle" class="player-content">
+            <!-- 左侧：封面和歌曲信息 -->
+            <el-col :span="6" class="song-info">
+              <div class="cover-image">
+                <el-image
+                  :src="playerSongInfo.coverUrl"
+                  fit="cover"
+                  class="cover"
+                />
+              </div>
+              <div class="song-details">
+                <div class="song-name">{{ playerSongInfo.songName }}</div>
+                <div class="artist-name">{{ playerSongInfo.artist }}</div>
+              </div>
             </el-col>
-            <el-col :span="3" style="margin-top: 12px; margin-left: 2px">
-              <el-row style="font-weight: bold">
-                {{ playerSongInfo.songName }}
-              </el-row>
-              <el-row style="font-size: 10px; margin-top: 3px">
-                {{ playerSongInfo.artist }}
-              </el-row>
-            </el-col>
-            <el-col :span="12">
+
+            <!-- 中间：播放器控件 -->
+            <el-col :span="12" class="player-controls">
               <audio
                 id="audio"
                 autoplay
                 :src="playerSongInfo.playUrl"
                 controls="controls"
-                style="width: 600px; height: 25px; margin-top: 20px"
-              ></audio>
+                class="audio-player"
+              />
             </el-col>
-            <el-col :span="2">
+
+            <!-- 右侧：操作按钮 -->
+            <el-col :span="6" class="operation-buttons">
               <el-tooltip
                 :content="
                   wyAccount
@@ -130,34 +129,30 @@
                 "
                 placement="top"
               >
-                <el-link
+                <el-button
+                  circle
+                  class="operation-btn"
+                  :disabled="!playerSongInfo.pageUrl || !wyAccount"
                   @click="
                     uploadToCloud(
                       playerSongInfo.pageUrl,
                       playerSongInfo.suggestMatchSongId
                     )
                   "
-                  :disabled="
-                    !playerSongInfo.pageUrl || !wyAccount ? true : false
-                  "
-                  :underline="false"
-                  style="margin: 20px 0 0 20px; color: white"
                 >
-                  <i class="bi bi-cloud-upload" style="font-size: 22px"></i>
-                </el-link>
+                  <i class="bi bi-cloud-upload"></i>
+                </el-button>
               </el-tooltip>
+
               <el-tooltip content="在源站查看" placement="top">
-                <el-link
+                <el-button
+                  circle
+                  class="operation-btn"
                   :disabled="!playerSongInfo.pageUrl"
-                  :href="playerSongInfo.pageUrl"
-                  target="_blank"
-                  style="margin: 20px 0 0 20px; color: white"
+                  @click="window.open(playerSongInfo.pageUrl, '_blank')"
                 >
-                  <i
-                    class="bi bi-box-arrow-up-right"
-                    style="font-size: 20px"
-                  ></i>
-                </el-link>
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </el-button>
               </el-tooltip>
             </el-col>
           </el-row>
@@ -171,6 +166,7 @@
 import { getPlayUrl, getSongsMeta, createSyncSongFromUrlJob } from "./api";
 import { startTaskListener } from "./components/TaskNotification";
 import storage from "./utils/storage";
+import { getProperPlayUrl } from "./utils/audio";
 
 export default {
   data: () => {
@@ -184,14 +180,22 @@ export default {
         suggestMatchSongId: "",
       },
       wyAccount: null,
+      navItems: [
+        { label: "搜索", path: "/", icon: "bi bi-search" },
+        { label: "我的歌单", path: "/playlist", icon: "bi bi-music-note-list" },
+        { label: "我的音乐账号", path: "/account", icon: "bi bi-person" },
+        { label: "设置", path: "/setting", icon: "bi bi-gear" },
+      ],
+      currentPath: "/",
     };
   },
   mounted() {
     this.wyAccount = storage.get("wyAccount");
   },
   watch: {
-    $route(to, from) {
+    $route(to) {
       this.wyAccount = storage.get("wyAccount");
+      this.currentPath = to.path;
     },
   },
   methods: {
@@ -229,7 +233,12 @@ export default {
       const resourceForbidden = info.resourceForbidden;
       const songUrl = info.audios[0].url;
       console.log("play: ", songUrl);
-      this.playerSongInfo.playUrl = songUrl;
+      this.playerSongInfo.playUrl = getProperPlayUrl(
+        info.source,
+        songUrl,
+        pageUrl || info.pageUrl
+      );
+
       this.playerSongInfo.coverUrl = info.coverUrl;
       this.playerSongInfo.songName = info.songName;
       this.playerSongInfo.artist = info.artist;
@@ -239,13 +248,16 @@ export default {
     async playTheSongWithPlayUrl(playOption) {
       if (!playOption.playUrl) {
         const playUrlRet = await getPlayUrl(playOption.songId);
-        if (!playUrlRet.data.playUrl) {
-          return false;
+        if (playUrlRet.data.playUrl) {
+          playOption.playUrl = playUrlRet.data.playUrl;
         }
-        playOption.playUrl = playUrlRet.data.playUrl;
       }
 
-      this.playerSongInfo.playUrl = playOption.playUrl;
+      this.playerSongInfo.playUrl = getProperPlayUrl(
+        playOption.source,
+        playOption.playUrl,
+        playOption.pageUrl
+      );
       this.playerSongInfo.coverUrl = playOption.coverUrl;
       this.playerSongInfo.songName = playOption.songName;
       this.playerSongInfo.artist = playOption.artist;
@@ -254,6 +266,9 @@ export default {
     },
     abortTheSong() {
       this.playerSongInfo.playUrl = "";
+    },
+    navigate(path) {
+      this.$router.push(path);
     },
   },
 };
@@ -300,6 +315,137 @@ export default {
   }
   .github-corner .octo-arm {
     animation: octocat-wave 560ms ease-in-out;
+  }
+}
+
+<style scoped > .nav-container {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  padding: 8px 0;
+  margin-top: 10px;
+}
+
+.nav-menu {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #606266;
+}
+
+.nav-item:hover {
+  color: #409eff;
+  background: rgba(64, 158, 255, 0.1);
+}
+
+.nav-item.active {
+  color: #409eff;
+  background: rgba(64, 158, 255, 0.1);
+  font-weight: 500;
+}
+
+.nav-item i {
+  font-size: 18px;
+  margin-right: 6px;
+}
+
+.nav-item span {
+  font-size: 15px;
+}
+
+.player-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to right, #1a1a1a, #2d2d2d);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  padding: 0;
+}
+
+.player-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.player-content {
+  height: 70px;
+  padding: 0 20px;
+}
+
+.song-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.cover-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.song-details {
+  color: #fff;
+}
+
+.song-name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.artist-name {
+  font-size: 12px;
+  color: #a8a8a8;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-player {
+  width: 100%;
+  max-width: 600px;
+  height: 32px;
+  border-radius: 16px;
+}
+
+.player-footer .operation-btn {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #000000;
+  transition: all 0.3s;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &:disabled {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  i {
+    font-size: 16px;
   }
 }
 </style>

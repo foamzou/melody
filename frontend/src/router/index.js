@@ -40,7 +40,7 @@ router.beforeEach((to, from, next) => {
     if (!mk) {
         next("/account");
     }
-    if ([PathPlaylist, PathSetting].includes(to.path) && !wyAccount) {
+    if ([PathPlaylist].includes(to.path) && !wyAccount) {
         next("/account");
         return;
     }
