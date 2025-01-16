@@ -13,7 +13,7 @@
               <el-col :span="16" :offset="4">
                 <el-input
                   v-model="mk"
-                  placeholder="32位长度的字符串"
+                  placeholder="Key 默认为 melody , 如果你部署到公网，请到配置里修改该默认值（后续支持 UI 管理账号）"
                   size="large"
                   :prefix-icon="Key"
                 >
