@@ -17,6 +17,8 @@
 
 - 支持在各大音乐和视频网站检索歌曲。目前支持 咪咕、网易云、QQ 音乐、酷狗、bilibili、抖音等站点。详情可以在我的 [media-get](https://github.com/foamzou/media-get#%E6%94%AF%E6%8C%81%E7%9A%84%E7%BD%91%E7%AB%99) 项目中查看
 - 支持一键下载到本地，一键上传到云盘
+- 支持定时上传网易云歌单歌曲到网易云云盘
+- 支持定时同步网易云歌单歌曲到本地
 - 用链接搜索歌曲（例如使用 b站或抖音的视频链接进行搜索，可以将对应的音频自动上传到音乐云盘）
 - 一键“解锁”无法播放的歌曲（一键检测变灰的歌曲，自动从公共资源搜索最佳资源，自动上传到云盘，自动匹配歌曲信息。代替繁琐的人工操作，实现可播放）（实验性功能，目前仅支持网易云）
 - PC 端、移动端适配良好（支持 PWA）
@@ -30,18 +32,18 @@
 2. 创建镜像，有两种方式选择(注意修改下面的宿主机目录为你实际的)：
    - 从 hub.docker.com 拉取
      ```
-     docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile foamzou/melody:latest
+     docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile -v /你宿主机的路径:/app/melody-data foamzou/melody:latest
      ```
    - 从代码编译镜像(若你的 docker 不支持 DOCKER_BUILDKIT，则去掉)
      ```
      DOCKER_BUILDKIT=1 docker build -t melody .
-     docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile melody
+     docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile -v /你宿主机的路径:/app/melody-data melody
      ```
 3. 后续更新（以从 hub.docker.com 更新为例）
    ```
    docker pull docker.io/foamzou/melody:latest
    docker kill <CONTAINER ID>
-   docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile foamzou/melody:latest
+   docker run -d -p 5566:5566  -v ~/melody-profile:/app/backend/.profile -v /你宿主机的路径:/app/melody-data foamzou/melody:latest
    ```
 
 ### 方式二：源码安装
