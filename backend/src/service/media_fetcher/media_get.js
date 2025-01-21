@@ -13,19 +13,34 @@ function getBinPath(isTemp = false) {
 }
 
 async function getMediaGetInfo(isTempBin = false) {
-    const {code, message} = await cmd(getBinPath(isTempBin), ['-h']);
-    if (code != 0) {
-        logger.error(`please install media-get first`);
+    try {
+        const {code, message, error} = await cmd(getBinPath(isTempBin), ['-h']);
+        logger.info('Command execution result:', {
+            code,
+            error,
+            binPath: getBinPath(isTempBin)
+        });
+        
+        if (code != 0) {
+            logger.error(`Failed to execute media-get:`, {
+                code,
+                error,
+                message
+            });
+            return false;
+        }
+
+        const hasInstallFFmpeg = message.indexOf('FFmpeg,FFprobe: installed') > -1;
+        const versionInfo = message.match(/Version:(.+?)\n/);
+
+        return {
+            hasInstallFFmpeg,
+            versionInfo: versionInfo ? versionInfo[1].trim() : '',
+            fullMessage: message,
+        }
+    } catch (err) {
+        logger.error('Exception while executing media-get:', err);
         return false;
-    }
-
-    const hasInstallFFmpeg = message.indexOf('FFmpeg,FFprobe: installed') > -1;
-    const versionInfo = message.match(/Version:(.+?)\n/);
-
-    return {
-        hasInstallFFmpeg,
-        versionInfo: versionInfo ? versionInfo[1].trim() : '',
-        fullMessage: message,
     }
 }
 
@@ -154,20 +169,55 @@ async function downloadTheLatestMediaGet(version) {
     fs.chmodSync(getBinPath(true), '755');
     logger.info('download finished');
     
-    const temBinInfo = await getMediaGetInfo(true)
-    if (!temBinInfo
-         || temBinInfo.versionInfo === ""
-        ) {
-        logger.error('testing new bin failed. Don`t update', temBinInfo)
-        return false;
-    }
+    // Add debug logs for binary file and validate
+    try {
+        const stats = fs.statSync(getBinPath(true));
+        logger.info(`Binary file stats: size=${stats.size}, mode=${stats.mode.toString(8)}`);
+        
+        // Check minimum file size (should be at least 2MB)
+        const minSize = 2 * 1024 * 1024;  // 2MB
+        if (stats.size < minSize) {
+            logger.error(`Invalid binary file size: ${stats.size} bytes. Expected at least ${minSize} bytes`);
+            return false;
+        }
+        
+        // Check file permissions (should be executable)
+        const executableMode = 0o755;
+        if ((stats.mode & 0o777) !== executableMode) {
+            logger.error(`Invalid binary file permissions: ${stats.mode.toString(8)}. Expected: ${executableMode.toString(8)}`);
+            return false;
+        }
 
-    const renameRet = await renameFile(getBinPath(true), getBinPath());
-    if (!renameRet) {
-        logger.error('rename failed');
+        // Skip validation when cross compiling
+        if (!process.env.CROSS_COMPILING) {
+            const temBinInfo = await getMediaGetInfo(true);
+            logger.info('Execution result:', {
+                binPath: getBinPath(true),
+                arch: process.arch,
+                platform: process.platform,
+                temBinInfo
+            });
+            
+            if (!temBinInfo || temBinInfo.versionInfo === "") {
+                logger.error('testing new bin failed. Details:', {
+                    binExists: fs.existsSync(getBinPath(true)),
+                    binPath: getBinPath(true),
+                    error: temBinInfo === false ? 'Execution failed' : 'No version info'
+                });
+                return false;
+            }
+        }
+        
+        const renameRet = await renameFile(getBinPath(true), getBinPath());
+        if (!renameRet) {
+            logger.error('rename failed');
+            return false;
+        }
+        return true;
+    } catch (err) {
+        logger.error('Failed to get binary stats:', err);
         return false;
     }
-    return true;
 }
 
 module.exports = {

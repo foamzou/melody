@@ -66,6 +66,11 @@ export default defineConfig(({command, mode}) => {
               css: ["https://cdnjs.cloudflare.com/ajax/libs/element-plus/2.1.9/theme-chalk/index.min.css"],
           },
           {
+              name: "@element-plus/icons-vue",
+              var: "ElementPlusIconsVue",
+              path: 'https://cdn.jsdelivr.net/npm/@element-plus/icons-vue@1.1.4/dist/index.iife.min.js',
+          },
+          {
               name: "element-plus/lib/locale/lang/zh-cn",
               var: "ElementPlusLocaleZhCn",
               path: 'https://cdnjs.cloudflare.com/ajax/libs/element-plus/2.1.9/locale/zh-cn.min.js',

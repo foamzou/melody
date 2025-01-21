@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^1.1.4",
     "axios": "0.26.1",
     "element-plus": "2.1.9",
     "howler": "github:foamzou/howler.js#0.0.1-foam",
