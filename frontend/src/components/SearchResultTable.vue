@@ -102,6 +102,25 @@
               </el-button>
             </el-tooltip>
 
+            <el-tooltip
+              :content="
+                globalConfig.downloadPathExisted
+                  ? '下载到服务器'
+                  : '下载到服务器(请先配置下载路径)'
+              "
+              placement="top"
+            >
+              <el-button
+                type="primary"
+                circle
+                @click="downloadToLocalService(scope.row.url)"
+                :disabled="!globalConfig.downloadPathExisted"
+                class="operation-btn"
+              >
+                <i class="bi bi-download"></i>
+              </el-button>
+            </el-tooltip>
+
             <el-tooltip content="在源站查看" placement="top">
               <el-button
                 type="warning"

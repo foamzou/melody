@@ -14,6 +14,9 @@ async function listJobs(uid) {
     const jobs = await getUserJobs(uid);
     for (const jobId in jobs) {
         const job = await getJob(uid, jobId);
+        if (!job) {
+            continue;
+        }
         job.id = jobId;
         list.push(job);
     }
@@ -25,7 +28,11 @@ async function getJob(uid, jobId) {
     if (!await asyncFs.asyncFileExisted(jobFile)) {
         return null;
     }
-    return JSON.parse(await asyncFs.asyncReadFile(jobFile));
+    const fileText = await asyncFs.asyncReadFile(jobFile);
+    if (fileText == "") {
+        return null;
+    }
+    return JSON.parse(fileText);
 }
 
 async function updateJob(uid, jobId, info) {
