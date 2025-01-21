@@ -5,8 +5,6 @@ const logger = require('consola');
 const locker = require('../utils/simple_locker');
 const fs = require('fs');
 const SoundQuality = require('../consts/sound_quality');
-const schedulerService = require('../service/scheduler');
-
 
 module.exports = {
     getAccount: getAccount,
@@ -83,6 +81,7 @@ async function setAccount(uid, loginType, account, password, countryCode = '', c
     // 重启调度器以应用新的账号配置
     if (config && JSON.stringify(oldAccount?.config?.playlistSyncToWyCloudDisk) !== 
     JSON.stringify(config.playlistSyncToWyCloudDisk)) {
+        const schedulerService = require('../service/scheduler');
         await schedulerService.updateCloudSyncJob(uid);
     }
     

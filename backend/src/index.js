@@ -11,7 +11,6 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 5566;
 
-const schedulerService = require('./service/scheduler');
 
 require('./init_app')().then(() => {
   const middlewareHandleError = require('./middleware/handle_error');
@@ -39,6 +38,7 @@ require('./init_app')().then(() => {
     const port = server.address().port
     logger.info(`Express server is listening on ${host}:${port}!`)
   })
-});
 
-schedulerService.start();
+  const schedulerService = require('./service/scheduler');
+  schedulerService.start();
+});
