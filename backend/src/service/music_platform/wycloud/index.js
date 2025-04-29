@@ -273,7 +273,9 @@ async function qrLoginCreate(uid) {
 }
 
 async function qrLoginCheck(uid, qrKey) {
-    const response = await safeRequest(uid, login_qr_check, {key: qrKey}, false);
+    const response = await safeRequest(uid, login_qr_check, {key: qrKey, cookie: {
+        os: 'pc',
+    }}, false);
     if (response === false) {
         return false;
     }
