@@ -82,7 +82,7 @@ async function fetchWithUrl(url, {
 async function getMetaWithUrl(url) {
     logger.info(`getMetaWithUrl from ${url}`);
 
-    let args = ['-u', `"${url}"`, '-m', '--infoFormat=json'];
+    let args = ['-u', `"${url}"`, '-m', '--infoFormat=json', '-l=silence'];
 
     const {code, message} = await cmd(getBinPath(), args);
     logger.info('-------')
@@ -94,7 +94,13 @@ async function getMetaWithUrl(url) {
         return false;
     }
 
-    const meta = JSON.parse(message);
+    let meta;
+    try {
+        meta = JSON.parse(message);
+    } catch (e) {
+        logger.error(e, message)
+        return false;
+    }
 
     return {
         songName: meta.title,
@@ -147,7 +153,7 @@ async function searchSongFromAllPlatform({
     try {
         jsonResponse = JSON.parse(message);
     } catch (e) {
-        logger.error(e)
+        logger.error(e, message)
         return false;
     }
 
