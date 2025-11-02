@@ -19,6 +19,7 @@ const defaultConfig = {
           enable: false,
           frequency: 1,
           frequencyUnit: "day",
+          onlyCreatedPlaylists: true,
         },
         syncWySong: true,
         syncNotWySong: false,
