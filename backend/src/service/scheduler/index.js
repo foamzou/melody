@@ -97,7 +97,11 @@ class SchedulerService {
         this.jobs.set(jobKey, schedule.scheduleJob(rule, async () => {
             logger.info(`Start cloud sync for account ${uid}`);
             const playlists = await getUserAllPlaylist(uid);
-            for (const playlist of playlists) {
+            // Filter playlists based on user preference
+            const playlistsToSync = account.config.playlistSyncToWyCloudDisk.autoSync.onlyCreatedPlaylists
+                ? playlists.filter(p => p.isCreatedByMe)
+                : playlists;
+            for (const playlist of playlistsToSync) {
                 logger.info(`Start sync playlist ${playlist.id} to cloud for account ${uid}`);
                 await unblockMusicInPlaylist(uid, sourceConsts.Netease.code, playlist.id, {
                     syncWySong: account.config.playlistSyncToWyCloudDisk.syncWySong,

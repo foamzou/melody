@@ -248,6 +248,14 @@
                   <div class="sync-options">
                     <el-checkbox
                       v-model="
+                        account.config.playlistSyncToWyCloudDisk.autoSync.onlyCreatedPlaylists
+                      "
+                    >
+                      仅同步我创建的歌单
+                      <el-tag size="small" type="success">推荐</el-tag>
+                    </el-checkbox>
+                    <el-checkbox
+                      v-model="
                         account.config.playlistSyncToWyCloudDisk.syncWySong
                       "
                     >
@@ -625,6 +633,7 @@ export default {
               enable: false,
               frequency: 1,
               frequencyUnit: "day",
+              onlyCreatedPlaylists: true,
             },
             syncWySong: true,
             syncNotWySong: false,
