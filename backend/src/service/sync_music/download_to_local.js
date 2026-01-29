@@ -66,7 +66,6 @@ function cleanFilename(filename) {
 
 function buildDestFilename(globalConfig, songInfo, playlistName) {
     const downloadPath = globalConfig.downloadPath;
-    const path = require('path');
     
     // 修复1：明确的格式选择逻辑
     let format;
@@ -76,14 +75,19 @@ function buildDestFilename(globalConfig, songInfo, playlistName) {
     } else {
         // 情况2：默认格式
         format = globalConfig.filenameFormat || '{artist} - {songName}';
-    }
-    
-    // 替换变量 + 对替换内容清洗，防止由于替换内容包含目录分割符而导致目录错误
+}  
+    // "Unknown"兜底，如果是无效值，替换
+    const artistSafe = cleanFilename(songInfo.artist || '') || 'Unknown';
+    const songNameSafe = cleanFilename(songInfo.songName || '') || 'Unknown';
+    const playlistSafe = cleanFilename(playlistName|| '') || 'UnknownPlaylist';
+    const albumSafe = cleanFilename(songInfo.album|| '') || 'Unknown';
+
+    // 替换变量 + 使用已经清洗的数据替换，防止由于替换内容包含目录分割符而导致目录错误
     let filename = format
-        .replace(/{artist}/g, cleanFilename(songInfo.artist) || 'Unknown')
-        .replace(/{songName}/g, cleanFilename(songInfo.songName) || 'Unknown')
-        .replace(/{playlistName}/g, cleanFilename(playlistName) || 'UnknownPlaylist')
-        .replace(/{album}/g, cleanFilename(songInfo.album) || 'Unknown');
+        .replace(/{artist}/g, artistSafe)
+        .replace(/{songName}/g, songNameSafe)
+        .replace(/{playlistName}/g, playlistSafe)
+        .replace(/{album}/g, albumSafe);
 
     // 以 .mp3 结尾 !!!这会导致无法实现“表面上”的无损下载，此处应当进行判断!!!
 
@@ -91,7 +95,7 @@ function buildDestFilename(globalConfig, songInfo, playlistName) {
         filename += '.mp3';
     }
     
-    // 使用 path.join 安全拼接路径
-    return path.join(downloadPath, filename);
+    // 使用 libPath.join 安全拼接路径
+    return libPath.join(downloadPath, filename);
 }
 
