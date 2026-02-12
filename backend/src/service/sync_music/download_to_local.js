@@ -94,7 +94,11 @@ function buildDestFilename(globalConfig, songInfo, playlistName) {
     if (!filename.toLowerCase().endsWith('.mp3')) {
         filename += '.mp3';
     }
-    
+    const validExtensions = /\.(mp3|flac|wav|m4a|ogg|ape|aac|wma)$/i;
+
+    if (!validExtensions.test(filename)) {
+        filename += '.mp3';
+    }
     // 使用 libPath.join 安全拼接路径
     return libPath.join(downloadPath, filename);
 }
