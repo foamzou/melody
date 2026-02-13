@@ -1,6 +1,7 @@
 const {
   getSongsFromPlaylist,
   getPlayUrl,
+  getPlayUrlWithType,
 } = require("../music_platform/wycloud");
 const syncSingleSongWithUrl = require("./sync_single_song_with_url");
 const logger = require("consola");
@@ -138,19 +139,20 @@ async function syncSingleSong(uid, wySongMeta, playlistInfo) {
     isLossless = true;
   }
   // 优先使用官方资源下载
-  const playUrl = await getPlayUrl(uid, wySongMeta.songId, isLossless);
-  if (playUrl) {
-    const tmpPath = await downloadViaSourceUrl(playUrl);
+  const playInfo = await getPlayUrlWithType(uid, wySongMeta.songId, isLossless);
+  if (playInfo.url) {
+    const tmpPath = await downloadViaSourceUrl(playInfo.url);
     if (tmpPath) {
         const collectRet = {};
       const ret = await downloadFromLocalTmpPath(
         tmpPath,
         wySongMeta,
         playlistName,
-        collectRet
+        collectRet,
+        playInfo.type
       );
       if (ret === true) {
-        logger.info(`download from official succeed`, wySongMeta);
+        logger.info(`download from official succeed`, wySongMeta,"with type:", playInfo.type," level:", playInfo.level);
         if (collectRet.md5Value) {
             await recordSongIndex(playlistID, wySongMeta.songId, wySongMeta, playlistName, collectRet.md5Value);
         }

@@ -17,14 +17,14 @@ async function downloadFromLocalTmpPath(tmpPath, songInfo = {
     songName: "",
     artist: "",
     album: "",
-}, playlistName = '', collectResponse) {
+}, playlistName = '', collectResponse, type = 'mp3') {
     const globalConfig = (await configManager.getGlobalConfig());
     const downloadPath = globalConfig.downloadPath;
     if (!downloadPath) {
         logger.error(`download path not set`);
         return "IOFailed";
     }
-    const destPathAndFilename = buildDestFilename(globalConfig, songInfo, playlistName);
+    const destPathAndFilename = buildDestFilename(globalConfig, songInfo, playlistName, type);
     const destPath = libPath.dirname(destPathAndFilename);
     // make sure the path is exist
     await utilFs.asyncMkdir(destPath, {recursive: true});
@@ -64,7 +64,7 @@ function cleanFilename(filename) {
     return filename;
 }
 
-function buildDestFilename(globalConfig, songInfo, playlistName) {
+function buildDestFilename(globalConfig, songInfo, playlistName, type = 'mp3') {
     const downloadPath = globalConfig.downloadPath;
     
     // 修复1：明确的格式选择逻辑
@@ -75,7 +75,7 @@ function buildDestFilename(globalConfig, songInfo, playlistName) {
     } else {
         // 情况2：默认格式
         format = globalConfig.filenameFormat || '{artist} - {songName}';
-}  
+}
     // "Unknown"兜底，如果是无效值，替换
     const artistSafe = cleanFilename(songInfo.artist || '') || 'Unknown';
     const songNameSafe = cleanFilename(songInfo.songName || '') || 'Unknown';
@@ -88,17 +88,17 @@ function buildDestFilename(globalConfig, songInfo, playlistName) {
         .replace(/{songName}/g, songNameSafe)
         .replace(/{playlistName}/g, playlistSafe)
         .replace(/{album}/g, albumSafe);
-
-    // 以 .mp3 结尾 !!!这会导致无法实现“表面上”的无损下载，此处应当进行判断!!!
-
-    if (!filename.toLowerCase().endsWith('.mp3')) {
-        filename += '.mp3';
+    // 使用传入的type作为文件后缀，默认使用mp3
+    const fileExtension = `.${type}`;
+    if (!filename.toLowerCase().endsWith(fileExtension)) {
+        // 移除可能存在的音频文件后缀 (mp3, flac, wav, m4a, ogg, ape, aac, wma)
+        const validExtensions = /\.(mp3|flac|wav|m4a|ogg|ape|aac|wma)$/i;
+        if (validExtensions.test(filename)) {
+            filename = filename.replace(validExtensions, '');
+        }
+        filename += fileExtension;
     }
-    const validExtensions = /\.(mp3|flac|wav|m4a|ogg|ape|aac|wma)$/i;
-
-    if (!validExtensions.test(filename)) {
-        filename += '.mp3';
-    }
+    
     // 使用 libPath.join 安全拼接路径
     return libPath.join(downloadPath, filename);
 }

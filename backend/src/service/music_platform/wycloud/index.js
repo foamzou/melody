@@ -129,6 +129,21 @@ async function getPlayUrl(uid, id, isLossless = false) {
     return response.data[0].url;
 }
 
+async function getPlayUrlWithType(uid, id, isLossless = false) {
+    const response = await safeRequest(uid, song_url, {
+        id,
+        br: isLossless ? 999000 : 320000
+    });
+    if (response === false || !response.data || !response.data[0].url) {
+        return { url: '', type: 'mp3' , level: ''};
+    }
+    return {
+        url: response.data[0].url,
+        type: response.data[0].type.toLowerCase() || 'mp3', //实际上，有可能返回“MP3”，这个值会成为文件的扩展名，要toLowerCase()
+        level: response.data[0].level || '',
+    };
+}
+
 async function getUserAllPlaylist(uid) {
     const wyAccount = await getMyAccount(uid);
     if (wyAccount === false) {
@@ -314,6 +329,7 @@ module.exports = {
     getUserAllPlaylist: getUserAllPlaylist,
     getSongInfo: getSongInfo,
     getPlayUrl: getPlayUrl,
+    getPlayUrlWithType: getPlayUrlWithType,
     qrLoginCreate: qrLoginCreate,
     qrLoginCheck: qrLoginCheck,
     verifyAccountStatus: verifyAccountStatus,
