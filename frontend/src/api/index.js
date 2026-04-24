@@ -67,6 +67,13 @@ export const updateMediaFetcherLib = (version) => {
         "version": version,
     });
 };
+export const uploadMediaFetcherLib = (formData) => {
+    return post("/media-fetcher-lib/upload", formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+};
 
 export const getGlobalConfig = _ => get("/config/global", {});
 export const setGlobalConfig = (config) => {

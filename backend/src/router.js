@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const multer = require('multer');
 
 const SyncJob = require('./handler/sync_jobs');
 const Songs = require('./handler/songs');
@@ -8,6 +9,10 @@ const Account = require('./handler/account');
 const MediaFetcherLib = require('./handler/media_fetcher_lib');
 const Config = require('./handler/config');
 const Scheduler = require('./handler/scheduler');
+
+// 配置 multer 存储
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const asyncWrapper = (cb) => {
     return (req, res, next) => cb(req, res, next).catch(next);
   };
@@ -32,6 +37,7 @@ router.get('/api/account/qrlogin-check', asyncWrapper(Account.qrLoginCheck));
 
 router.get('/api/media-fetcher-lib/version-check', asyncWrapper(MediaFetcherLib.checkLibVersion));
 router.post('/api/media-fetcher-lib/update', asyncWrapper(MediaFetcherLib.downloadTheLatestLib));
+router.post('/api/media-fetcher-lib/upload', upload.single('file'), asyncWrapper(MediaFetcherLib.uploadMediaFetcherLib));
 
 router.get('/api/config/global', asyncWrapper(Config.getGlobalConfig));
 router.post('/api/config/global', asyncWrapper(Config.setGlobalConfig));

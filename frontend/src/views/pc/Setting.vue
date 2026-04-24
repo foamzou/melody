@@ -10,7 +10,7 @@
         </template>
         <el-row align="middle" class="version-info">
           <el-col :span="16">
-            <span class="label">当前使用的 media-get 版本号:</span>
+            <span class="label">使用的 media-get 版本号:</span>
             <span class="version">{{ mediaGetVersion }}</span>
             <span class="label">最新的版本号:</span>
             <span class="version">{{ latestVersion }}</span>
@@ -19,7 +19,7 @@
             <el-button
               type="primary"
               :disabled="updating"
-              @click="updateMediaGet"
+              @click="showUpdateDialog"
               class="update-btn"
             >
               <template v-if="!updating">更新 media-get</template>
@@ -27,6 +27,46 @@
             </el-button>
           </el-col>
         </el-row>
+        
+        <!-- 更新方式选择对话框 -->
+        <el-dialog
+          v-model="updateDialogVisible"
+          title="选择更新方式"
+          width="500px"
+        >
+          <el-radio-group v-model="updateMethod">
+            <el-radio label="online">在线更新</el-radio>
+            <el-radio label="upload">上传文件</el-radio>
+          </el-radio-group>
+          
+          <div v-if="updateMethod === 'upload'" class="upload-section">
+            <div class="environment-info">
+              <span class="label">当前环境:</span>
+              <span class="version">{{ environment }}</span>
+            </div>
+            <el-upload
+              class="upload-demo"
+              :auto-upload="false"
+              :on-change="handleFileChange"
+              :show-file-list="true"
+              :limit="1"
+            >
+              <el-button type="primary">选择文件</el-button>
+              <template #tip>
+                <div class="el-upload__tip">
+                  请上传适用于当前环境的 media-get 可执行文件
+                </div>
+              </template>
+            </el-upload>
+          </div>
+          
+          <template #footer>
+            <span class="dialog-footer">
+              <el-button @click="updateDialogVisible = false">取消</el-button>
+              <el-button type="primary" @click="confirmUpdate">确定</el-button>
+            </span>
+          </template>
+        </el-dialog>
       </el-card>
 
       <!-- 本地下载配置 -->
@@ -275,6 +315,22 @@
   margin-right: 20px;
 }
 
+.environment-info {
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+}
+
+.environment-info .label {
+  color: #606266;
+  margin-right: 8px;
+}
+
+.environment-info .version {
+  font-weight: 500;
+}
+
 .update-btn {
   min-width: 120px;
 }
@@ -357,6 +413,7 @@
 import {
   checkMediaFetcherLib,
   updateMediaFetcherLib,
+  uploadMediaFetcherLib,
   getGlobalConfig,
   setGlobalConfig,
   getAllAccounts,
@@ -370,7 +427,11 @@ export default {
     return {
       mediaGetVersion: "查询中",
       latestVersion: "查询中",
+      environment: "查询中",
       updating: false,
+      updateDialogVisible: false,
+      updateMethod: "online",
+      selectedFile: null,
       downloadPath: "",
       filenameFormat: "",
       checkedSources: [],
@@ -411,40 +472,96 @@ export default {
       if (ret !== false && ret.data) {
         this.mediaGetVersion = ret.data.mediaGetInfo.versionInfo;
         this.latestVersion = ret.data.latestVersion;
+        this.environment = ret.data.environment;
       }
     },
-    async updateMediaGet() {
-      if (this.mediaGetVersion === this.latestVersion) {
+    showUpdateDialog() {
+      this.updateDialogVisible = true;
+      this.updateMethod = "online";
+      this.selectedFile = null;
+    },
+    handleFileChange(file) {
+      this.selectedFile = file.raw;
+    },
+    async confirmUpdate() {
+      if (this.updateMethod === "online") {
+        if (this.mediaGetVersion === this.latestVersion) {
+          ElMessage({
+            center: true,
+            type: "info",
+            message: "已经是最新版本",
+          });
+          this.updateDialogVisible = false;
+          return false;
+        }
+
+        this.updating = true;
+        this.updateDialogVisible = false;
+
+        const ret = await updateMediaFetcherLib(this.latestVersion);
+        if (ret === false || ret.status != 0) {
+          ElMessage({
+            center: true,
+            type: "error",
+            message: "更新失败",
+          });
+          this.updating = false;
+          return false;
+        }
+
         ElMessage({
           center: true,
-          type: "info",
-          message: "已经是最新版本",
+          type: "success",
+          message: "更新成功",
         });
-        return false;
+
+        this.checklib();
+        this.updating = false;
+      } else if (this.updateMethod === "upload") {
+        if (!this.selectedFile) {
+          ElMessage({
+            center: true,
+            type: "error",
+            message: "请选择文件",
+          });
+          return false;
+        }
+
+        this.updating = true;
+        this.updateDialogVisible = false;
+
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
+
+        try {
+          const ret = await uploadMediaFetcherLib(formData);
+          if (ret === false || ret.status != 0) {
+            ElMessage({
+              center: true,
+              type: "error",
+              message: "上传更新失败",
+            });
+            this.updating = false;
+            return false;
+          }
+
+          ElMessage({
+            center: true,
+            type: "success",
+            message: "上传更新成功",
+          });
+
+          this.checklib();
+          this.updating = false;
+        } catch (error) {
+          ElMessage({
+            center: true,
+            type: "error",
+            message: "上传失败",
+          });
+          this.updating = false;
+        }
       }
-
-      this.updating = true; // Disable the button and show "更新中" text
-
-      const ret = await updateMediaFetcherLib(this.latestVersion);
-      if (ret === false || ret.status != 0) {
-        ElMessage({
-          center: true,
-          type: "error",
-          message: "更新失败",
-        });
-        this.updating = false; // Enable the button again
-        return false;
-      }
-
-      ElMessage({
-        center: true,
-        type: "success",
-        message: "更新成功",
-      });
-
-      this.checklib();
-
-      this.updating = false; // Enable the button again
     },
 
     async updateConfig() {

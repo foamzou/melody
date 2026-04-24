@@ -7,6 +7,8 @@ const isDarwin = require('os').platform().indexOf('darwin') > -1;
 const httpsGet = require('../../utils/network').asyncHttpsGet;
 const RemoteConfig = require('../remote_config');
 const fs = require('fs');
+const { pipeline } = require('stream/promises');
+const path = require('path');
 
 function getBinPath(isTemp = false) {
     return `${__dirname}/../../../bin/media-get` + (isTemp ? '-tmp-' : '') + (isWin ? '.exe' : '');
@@ -58,76 +60,112 @@ async function getLatestMediaGetVersion() {
     return latestVersion;
 }
 
-async function downloadFile(url, filename) {
-    return new Promise((resolve) => {
-        let fileStream = fs.createWriteStream(filename);
-        let receivedBytes = 0;
+async function downloadFile(url, filename, maxRedirects = 20) {
+  return new Promise((resolve) => {
+    // 自动创建目录，防止报错
+    const dir = path.dirname(filename);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
 
-        const handleResponse = (res) => {
-            // Handle redirects
-            if (res.statusCode === 301 || res.statusCode === 302) {
-                logger.info('Following redirect');
-                fileStream.end();
-                fileStream = fs.createWriteStream(filename);
-                if (res.headers.location) {
-                    https.get(res.headers.location, handleResponse)
-                        .on('error', handleError);
-                }
-                return;
+    let fileStream;
+    let receivedBytes = 0;
+    let totalBytes = 0;
+    let redirectCount = 0;
+    let isFinished = false;
+
+    // 全局下载超时 10 分钟
+    const timeout = setTimeout(() => {
+      handleError(new Error('Download timeout (10min)'));
+    }, 10 * 60 * 1000);
+
+    // 安全清理
+    const safeCleanup = () => {
+      clearTimeout(timeout);
+      if (fileStream && !fileStream.destroyed) {
+        fileStream.destroy();
+      }
+    };
+
+    const handleError = (error) => {
+      if (isFinished) return;
+      isFinished = true;
+      safeCleanup();
+
+      // 只有文件存在时才删除
+      fs.access(filename, (err) => {
+        if (!err) {
+          fs.unlink(filename, (unlinkErr) => {
+            if (unlinkErr) {
+              logger.debug('Cleanup temp file failed');
             }
+          });
+        }
+      });
 
-            // Check for successful status code
-            if (res.statusCode !== 200) {
-                handleError(new Error(`HTTP Error: ${res.statusCode}`));
-                return;
-            }
+      logger.error('Download error:', error.message);
+      resolve(false);
+    };
 
-            const totalBytes = parseInt(res.headers['content-length'], 10);
+    // 处理响应
+    const handleResponse = async (res) => {
+      try {
+        // 重定向
+        if ([301, 302, 307, 308].includes(res.statusCode)) {
+          redirectCount++;
+          if (redirectCount > maxRedirects) {
+            throw new Error(`Too many redirects (max ${maxRedirects})`);
+          }
+          const location = res.headers.location;
+          if (!location) throw new Error('Redirect missing location');
 
-            res.on('error', handleError);
-            fileStream.on('error', handleError);
+          logger.info(`重定向 ${redirectCount}/${maxRedirects}`);
+          https.get(location, handleResponse).on('error', handleError);
+          return;
+        }
 
-            res.pipe(fileStream);
+        // HTTP 状态错误
+        if (res.statusCode !== 200) {
+          throw new Error(`HTTP ${res.statusCode}`);
+        }
 
-            res.on('data', (chunk) => {
-                receivedBytes += chunk.length;
-            });
+        // 创建写入流
+        fileStream = fs.createWriteStream(filename);
+        totalBytes = parseInt(res.headers['content-length'], 10) || 0;
 
-            fileStream.on('finish', () => {
-                fileStream.close(() => {
-                    if (receivedBytes === 0) {
-                        fs.unlink(filename, () => {
-                            logger.error('Download failed: Empty file received');
-                            resolve(false);
-                        });
-                    } else if (totalBytes && receivedBytes < totalBytes) {
-                        fs.unlink(filename, () => {
-                            logger.error(`Download incomplete: ${receivedBytes}/${totalBytes} bytes`);
-                            resolve(false);
-                        });
-                    } else {
-                        resolve(true);
-                    }
-                });
-            });
-        };
+        // 统计下载大小
+        res.on('data', (chunk) => {
+          receivedBytes += chunk.length;
+        });
 
-        const handleError = (error) => {
-            fileStream.destroy();
-            fs.unlink(filename, () => {
-                logger.error('Download error:', error);
-                resolve(false);
-            });
-        };
+        // 安全流式写入
+        await pipeline(res, fileStream);
 
-        const req = https.get(url, handleResponse)
-            .on('error', handleError)
-            .setTimeout(60000, () => {
-                handleError(new Error('Download timeout'));
-            });
+        // 完成
+        safeCleanup();
+        if (isFinished) return;
+        isFinished = true;
 
-        req.on('error', handleError);
-    });
+        // 校验文件
+        if (receivedBytes === 0) {
+          logger.error('Download failed: Empty file');
+          fs.unlink(filename, () => resolve(false));
+        } else if (totalBytes && receivedBytes < totalBytes) {
+          logger.error(`Download incomplete: ${receivedBytes}/${totalBytes}`);
+          fs.unlink(filename, () => resolve(false));
+        } else {
+          logger.info('Download success');
+          resolve(true);
+        }
+
+      } catch (err) {
+        handleError(err);
+      }
+    };
+
+    // 开始请求
+    const req = https.get(url, handleResponse).on('error', handleError);
+  });
 }
 
 async function getMediaGetRemoteFilename(latestVersion) {
@@ -166,7 +204,10 @@ async function downloadTheLatestMediaGet(version) {
         logger.error('download failed');
         return false;
     }
-    fs.chmodSync(getBinPath(true), '755');
+    // Windows 不需要设置权限
+    if (!isWin) {
+      fs.chmodSync(getBinPath(true), '755');
+    }
     logger.info('download finished');
     
     // Add debug logs for binary file and validate
@@ -183,7 +224,8 @@ async function downloadTheLatestMediaGet(version) {
         
         // Check file permissions (should be executable)
         const executableMode = 0o755;
-        if ((stats.mode & 0o777) !== executableMode) {
+        // Windows 跳过权限检查
+        if (!isWin && (stats.mode & 0o777) !== executableMode) {
             logger.error(`Invalid binary file permissions: ${stats.mode.toString(8)}. Expected: ${executableMode.toString(8)}`);
             return false;
         }
@@ -221,6 +263,7 @@ async function downloadTheLatestMediaGet(version) {
 }
 
 module.exports = {
+    downloadFile: downloadFile,
     getBinPath: getBinPath,
     getMediaGetInfo: getMediaGetInfo,
     getLatestMediaGetVersion: getLatestMediaGetVersion,

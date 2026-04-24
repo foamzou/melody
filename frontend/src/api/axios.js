@@ -13,6 +13,7 @@ axiosApiInstance.defaults.timeout = 12000;
 axiosApiInstance.interceptors.request.use(
     config => {
         config.headers = {
+            ...config.headers,
             'mk': (config.params && config.params['mk']) ? config.params['mk'] : storage.get('mk')
         }
         return config;
@@ -41,12 +42,13 @@ axiosApiInstance.interceptors.response.use(
     }
 );
 
-export const post = (url, data) => {
+export const post = (url, data, config = {}) => {
     return new Promise((resolve, reject) => {
         axiosApiInstance({
                 method: 'post',
                 url,
                 data,
+                ...config
             })
             .then(res => {
                 resolve(res ? res.data : false)
